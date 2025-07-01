@@ -1,0 +1,2 @@
+keytool -import -alias nuc_cert -keystore "C:\Program Files\Java\jre-1.8\lib\security\cacerts" -file "C:\Java\FinancialAssistant\res\certificates\russian_trusted_root_ca.cer"
+keytool -list -keystore "C:\Program Files\Java\jre-1.8\lib\security\cacerts"

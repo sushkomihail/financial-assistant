@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="chat.giga.gigachat.java" type="repository">
+    <properties maven-id="chat.giga:gigachat-java:0.1.10" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/gigachat-java-0.1.10.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/gigachat-http-client-0.1.10.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/gigachat-http-client-jdk-0.1.10.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-2.0.17.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.18.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.18.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.18.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
