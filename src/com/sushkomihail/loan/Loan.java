@@ -37,6 +37,20 @@ public abstract class Loan {
         return paymentsAmount;
     }
 
+    public double getMaxPayment() {
+        double max = payments.get(0);
+
+        for (int i = 1; i < payments.size(); i++) {
+            if (payments.get(i) > max) {
+                max = payments.get(i);
+            }
+        }
+
+        return max;
+    }
+
+    protected abstract String getPaymentType();
+
     protected abstract void calculatePayments();
 
     protected abstract void calculateAmount();

@@ -8,6 +8,11 @@ public final class AnnuityPaymentLoan extends Loan {
     }
 
     @Override
+    protected String getPaymentType() {
+        return "Аннуитетный";
+    }
+
+    @Override
     protected void calculatePayments() {
         double monthlyInterestRate = interestRate / 1200;
         double payment = amount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, period) /

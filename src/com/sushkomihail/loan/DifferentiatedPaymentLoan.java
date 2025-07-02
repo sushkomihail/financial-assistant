@@ -8,6 +8,11 @@ public final class DifferentiatedPaymentLoan extends Loan {
     }
 
     @Override
+    protected String getPaymentType() {
+        return "Дифференцированный";
+    }
+
+    @Override
     protected void calculatePayments() {
         double monthlyInterestRate = interestRate / 1200;
         double basicPayment = (double) amount / period;
