@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.paxeevamaria.logic.RootController">
+
+    <!-- Верхняя панель - меню -->
+    <top>
+        <MenuBar>
+            <Menu text="Файл">
+                <MenuItem text="Выход" onAction="#handleExit"/>
+            </Menu>
+            <Menu text="Операции">
+                <MenuItem text="Доходы" onAction="#showIncome"/>
+                <MenuItem text="Расходы" onAction="#showExpense"/>
+            </Menu>
+            <Menu text="Аналитика">
+                <MenuItem text="Статистика" onAction="#showAnalytics"/>
+                <MenuItem text="Кредиты" onAction="#showCredit"/>
+                <MenuItem text="Накопления" onAction="#showSavings"/>
+            </Menu>
+        </MenuBar>
+
+    </top>
+
+    <!-- Левая панель - навигация -->
+    <left>
+        <VBox spacing="10" styleClass="sidebar">
+            <Button text="Главная" onAction="#showDashboard" styleClass="nav-button"/>
+            <Button text="Доходы" onAction="#showIncome" styleClass="nav-button"/>
+            <Button text="Расходы" onAction="#showExpense" styleClass="nav-button"/>
+            <Button text="Аналитика" onAction="#showAnalytics" styleClass="nav-button"/>
+            <Button text="Кредиты" onAction="#showCredit" styleClass="nav-button"/>
+            <Button text="Накопления" onAction="#showSavings" styleClass="nav-button"/>
+        </VBox>
+    </left>
+
+    <!-- Центральная область (здесь будет динамически отображаться содержимое) -->
+    <center>
+    </center>
+
+</BorderPane>
