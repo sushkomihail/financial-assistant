@@ -21,7 +21,6 @@ public class LoanAnalytics {
                 "Максимальный ежемесячный платеж для данных кредитных условий и типе платежа - '" +
                 loan.getPaymentType() + "' составит " + String.format("%.2f", loan.getMaxPayment()) + " руб.\n\n";
 
-
         if (maxPayment >= loan.getMaxPayment()) {
             analytics += "Ваши финансовые возможности соответствуют рекомендациям.";
         } else {

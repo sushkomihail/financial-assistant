@@ -20,6 +20,6 @@ public class LoanOffersResponse implements ILlmAgentResponse {
     }
 
     public void add(String bankName, String loanInterest) {
-        offers.add(new LoanOffer(bankName, loanAmount, loanTerm, loanInterest));
+
     }
 }
