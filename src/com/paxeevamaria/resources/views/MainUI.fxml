@@ -10,6 +10,8 @@
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.chart.BarChart?>
 
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.ProgressIndicator?>
 <AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.paxeevamaria.logic.MainUIController">
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10">
@@ -26,13 +28,17 @@
                     <xAxis><CategoryAxis /></xAxis>
                     <yAxis><NumberAxis /></yAxis>
                 </LineChart>
+                <ProgressIndicator fx:id="lineChartLoading" visible="false"/>
             </VBox>
         </HBox>
 
         <HBox spacing="20">
             <VBox spacing="10" styleClass="dashboard-card">
                 <Label text="Расходы по категориям" styleClass="card-header"/>
-                <PieChart fx:id="expensePieChart"/>
+                <StackPane>
+                    <PieChart fx:id="expensePieChart"/>
+                    <ProgressIndicator fx:id="pieChartLoading" visible="false"/>
+                </StackPane>
             </VBox>
 
             <VBox spacing="10" styleClass="dashboard-card">
@@ -41,6 +47,7 @@
                     <xAxis><CategoryAxis /></xAxis>
                     <yAxis><NumberAxis /></yAxis>
                 </BarChart>
+                <ProgressIndicator fx:id="barChartLoading" visible="false"/>
             </VBox>
         </HBox>
     </VBox>

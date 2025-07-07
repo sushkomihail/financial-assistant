@@ -75,9 +75,7 @@ public class App extends Application {
 
     public void showExpense() {}
 
-    public void showAnalytics() {}
-
-    public void showCredit() {}
+    public void showCredits() {}
 
     public void showSavings() {}
 

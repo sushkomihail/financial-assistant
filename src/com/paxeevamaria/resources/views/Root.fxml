@@ -18,7 +18,7 @@
                 <MenuItem text="Расходы" onAction="#showExpense"/>
             </Menu>
             <Menu text="Аналитика">
-                <MenuItem text="Статистика" onAction="#showAnalytics"/>
+<!--                <MenuItem text="Статистика" onAction="#showAnalytics"/>-->
                 <MenuItem text="Кредиты" onAction="#showCredit"/>
                 <MenuItem text="Накопления" onAction="#showSavings"/>
             </Menu>
@@ -32,7 +32,7 @@
             <Button text="Главная" onAction="#showDashboard" styleClass="nav-button"/>
             <Button text="Доходы" onAction="#showIncome" styleClass="nav-button"/>
             <Button text="Расходы" onAction="#showExpense" styleClass="nav-button"/>
-            <Button text="Аналитика" onAction="#showAnalytics" styleClass="nav-button"/>
+<!--            <Button text="Аналитика" onAction="#showAnalytics" styleClass="nav-button"/>-->
             <Button text="Кредиты" onAction="#showCredit" styleClass="nav-button"/>
             <Button text="Накопления" onAction="#showSavings" styleClass="nav-button"/>
         </VBox>
