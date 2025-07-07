@@ -79,7 +79,7 @@ public class GigaChatAgent {
         }
     }
 
-    public String handleRequestWithFunction(String model, LlmAgentRequest request) {
+    public CompletionResponse handleRequestWithFunction(String model, LlmAgentRequest request) {
         try {
             var requestBuilder = CompletionRequest.builder();
             requestBuilder.model(model);
@@ -93,42 +93,22 @@ public class GigaChatAgent {
             }
 
             requestBuilder.function(function);
-            System.out.println(requestBuilder.build());
-            var response =
-                    client.completions(requestBuilder.build());
-
-            if (response == null) {
-                return null;
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(response);
+            return client.completions(requestBuilder.build());
         } catch (HttpClientException e) {
             System.out.println(e.statusCode() + " " + e.bodyAsString());
-        } catch (JsonProcessingException e) {
-            System.out.println(e.getMessage());
         }
 
         return null;
     }
 
-    public String handleRequest(String model) {
+    public CompletionResponse handleRequest(String model) {
         var requestBuilder = CompletionRequest.builder()
                 .model(model)
                 .messages(messagesHistory)
                 .temperature(0.001F)
                 .build();
 
-        var response = client.completions(requestBuilder).choices().get(0).message().content();
-        ObjectMapper mapper = new ObjectMapper();
-
-        try {
-            return mapper.writeValueAsString(response);
-        } catch (JsonProcessingException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return null;
+        return client.completions(requestBuilder);
     }
 
     private void initClient(String authKey) {

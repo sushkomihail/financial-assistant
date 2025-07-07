@@ -1,4 +1,4 @@
 package com.sushkomihail.llmagent.datastructures;
 
-public record Expense(ExpenseType type, int amount, String date) {
+public record Expense(int amount, String month) {
 }

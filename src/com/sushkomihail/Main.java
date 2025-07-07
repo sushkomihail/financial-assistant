@@ -2,10 +2,15 @@ package com.sushkomihail;
 
 import com.sushkomihail.llmagent.GigaChatAgent;
 import com.sushkomihail.llmagent.LlmAgentController;
-import com.sushkomihail.llmagent.requests.LoanOfferRequest;
-import com.sushkomihail.llmagent.requests.MimeType;
+import com.sushkomihail.llmagent.datastructures.Expense;
+import com.sushkomihail.llmagent.datastructures.ExpenseType;
+import com.sushkomihail.llmagent.datastructures.Income;
+import com.sushkomihail.llmagent.datastructures.NetIncomesCollection;
+import com.sushkomihail.llmagent.requests.SavingsForecastRequest;
 
 import java.io.FileInputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 public class Main {
@@ -19,7 +24,14 @@ public class Main {
             // --------------- Giga Chat -----------------
             GigaChatAgent gigaChatAgent = new GigaChatAgent(authKey);
             LlmAgentController controller = new LlmAgentController(gigaChatAgent);
-            controller.getLoanOffers(new LoanOfferRequest(MimeType.PDF, "sber.pdf"));
+
+            // Пример получения прогноза накоплений
+            List<Integer> savings = controller.getSavingsForecast(new SavingsForecastRequest(5,
+                    new NetIncomesCollection(
+                            Arrays.asList(43000, 50000, 41000, 37000),
+                            Arrays.asList(10000, 13000, 25000, 12500))));
+            System.out.println(savings.toString());
+            // controller.getLoanOffers(new LoanOfferRequest(MimeType.PDF, "sber.pdf"));
 //            System.out.println(gigaChatAgent.handleRequest(
 //                    new LoanOffersRequest("")));
 
