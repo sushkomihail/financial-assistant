@@ -129,4 +129,23 @@ public class FinancialRepository {
         }
         return offers;
     }
+    public List<MonthlyFinancialSummaryDTO> getMonthlyFinancialSummary() throws SQLException {
+        List<MonthlyFinancialSummaryDTO> summaryList = new ArrayList<>();
+        String sql = "SELECT * FROM get_full_monthly_summary();";
+
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            while (resultSet.next()) {
+                LocalDate month = resultSet.getDate("month_date").toLocalDate();
+                BigDecimal income = resultSet.getBigDecimal("total_income");
+                BigDecimal expense = resultSet.getBigDecimal("total_expense");
+                BigDecimal profit = resultSet.getBigDecimal("profit");
+
+                summaryList.add(new MonthlyFinancialSummaryDTO(month, income, expense, profit));
+            }
+        }
+        return summaryList;
+    }
 }
