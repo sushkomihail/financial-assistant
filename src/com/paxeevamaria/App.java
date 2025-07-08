@@ -1,9 +1,14 @@
 package com.paxeevamaria;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
+
 import com.paxeevamaria.logic.IncomeController;
 import com.paxeevamaria.logic.MainUIController;
 import com.paxeevamaria.logic.RootController;
+import com.sushkomihail.llmagent.GigaChatAgent;
+import com.sushkomihail.llmagent.LlmAgentController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -46,11 +51,19 @@ public class App extends Application {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(App.class.getResource("./resources/views/MainUI.fxml"));
             AnchorPane dashboard = loader.load();
-
             rootLayout.setCenter(dashboard);
-
             MainUIController controller = loader.getController();
-            controller.setMainPanel();
+
+//          --------------- GIGA CHAT -----------------
+            Properties props = new Properties();
+            FileInputStream configFile = new FileInputStream("gigachatapi.properties");
+            props.load(configFile);
+            String authKey = props.getProperty("auth_key");
+
+            GigaChatAgent gigaChatAgent = new GigaChatAgent(authKey);
+            LlmAgentController llmAgentController = new LlmAgentController(gigaChatAgent);
+
+            controller.setMainPanel(llmAgentController);
         } catch (IOException e) {
             e.printStackTrace();
         }

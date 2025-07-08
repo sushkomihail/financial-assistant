@@ -2,6 +2,11 @@ package com.paxeevamaria.logic;
 
 import com.kolesnikovroman.CategorySummaryDTO;
 import com.kolesnikovroman.FinancialRepository;
+import com.kolesnikovroman.MonthlyFinancialSummaryDTO;
+import com.sushkomihail.llmagent.LlmAgentController;
+import com.sushkomihail.llmagent.datastructures.NetIncomesCollection;
+import com.sushkomihail.llmagent.requests.SavingsForecastRequest;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -11,7 +16,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ProgressIndicator;
 
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainUIController {
     @FXML
@@ -23,10 +33,12 @@ public class MainUIController {
     @FXML
     private ProgressIndicator pieChartLoading; // Индикатор загрузки для круговой диаграммы
 
+    private LlmAgentController llmAgentController;
     private FinancialRepository financialRepository;
 
     // Инициализация главной панели
-    public void setMainPanel() {
+    public void setMainPanel(LlmAgentController llmAgentController) {
+        this.llmAgentController = llmAgentController;
         financialRepository = new FinancialRepository();
         updateCharts();
     }
@@ -98,14 +110,111 @@ public class MainUIController {
 
     // Метод для обновления графика накоплений
     private void updateSavingsChart() {
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Накопления");
-        series.getData().add(new XYChart.Data<>("Янв", 5000));
-        series.getData().add(new XYChart.Data<>("Фев", 12000));
-        series.getData().add(new XYChart.Data<>("Мар", 20000));
-        series.getData().add(new XYChart.Data<>("Апр", 29000));
+        savingsChart.setVisible(false);
+        ProgressIndicator savingsLoading = new ProgressIndicator();
+        savingsLoading.setVisible(true);
 
-        savingsChart.getData().add(series);
+        Task<XYChart.Series<String, Number>> task = new Task<>() {
+            @Override
+            protected XYChart.Series<String, Number> call() throws Exception {
+
+                try {
+                    // Получение данных о прошлых доходах и расходах из базы
+                    List<MonthlyFinancialSummaryDTO> history = financialRepository.getMonthlyFinancialSummary();
+
+                    // Подготовка данных для прогноза
+                    List<BigDecimal> incomes = history.stream()
+                            .map(MonthlyFinancialSummaryDTO::getTotalIncome)
+                            .collect(Collectors.toList());
+
+                    List<BigDecimal> expenses = history.stream()
+                            .map(MonthlyFinancialSummaryDTO::getTotalExpense)
+                            .collect(Collectors.toList());
+
+                    // Получение прогноза из LLM на 6 месяцев
+                    SavingsForecastRequest request = new SavingsForecastRequest(
+                            6,
+                            new NetIncomesCollection(
+                                    incomes.stream().map(BigDecimal::intValue).collect(Collectors.toList()),
+                                    expenses.stream().map(BigDecimal::intValue).collect(Collectors.toList())
+                            )
+                    );
+
+                    List<Integer> forecast = llmAgentController.getSavingsForecast(request);
+
+                    // Формирование серии данных для графика
+                    XYChart.Series<String, Number> series = new XYChart.Series<>();
+                    series.setName("Прогноз накоплений");
+
+                    BigDecimal cumulative = BigDecimal.ZERO;
+                    String[] futureMonths = getFutureMonthNames(6);
+                    for (int i = 0; i < forecast.size(); i++) {
+                        cumulative = cumulative.add(new BigDecimal(forecast.get(i))); // Накопление суммы
+                        series.getData().add(new XYChart.Data<>(
+                                futureMonths[i],
+                                cumulative
+                        ));
+                    }
+
+                    return series;
+                } catch (SQLException e) {
+                    throw new RuntimeException("Ошибка при получении данных из БД", e);
+                }
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            Platform.runLater(() -> {
+                savingsChart.getData().clear();
+                savingsChart.getData().add(task.getValue());
+
+                // Настройка осей графика
+                CategoryAxis xAxis = (CategoryAxis) savingsChart.getXAxis();
+                xAxis.setCategories(FXCollections.observableArrayList(getFutureMonthNames(6)));
+                xAxis.setLabel("Месяц");
+
+                NumberAxis yAxis = (NumberAxis) savingsChart.getYAxis();
+                yAxis.setLabel("Сумма (руб)");
+
+                savingsChart.setVisible(true);
+                savingsLoading.setVisible(false);
+
+                // Принудительное обновление графика
+                savingsChart.requestLayout();
+            });
+        });
+
+        task.setOnFailed(e -> {
+            Platform.runLater(() -> {
+                savingsLoading.setVisible(false);
+                showErrorDialog("Не удалось получить прогноз накоплений: " +
+                        task.getException().getMessage());
+            });
+        });
+
+        new Thread(task).start();
+    }
+
+    // Получение названий следующих от текущей даты 6 месяцев для отображения на графике накоплений
+    private String[] getFutureMonthNames(int months) {
+        String[] nextMonths = new String[months];
+        LocalDate now = LocalDate.now();
+
+        String[] nameOfMonths = {"Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"};
+
+        for (int i = 0; i < months; i++) {
+            LocalDate date = now.plusMonths(i + 1);
+            int monthIndex = date.getMonthValue() - 1; // Получение индекса месяца (0-11)
+            nextMonths[i] = nameOfMonths[monthIndex];
+        }
+
+        return nextMonths;
+    }
+
+    // Ceттер для установки LlmAgentController
+    public void setLlmAgentController(LlmAgentController llmAgentController) {
+        this.llmAgentController = llmAgentController;
     }
 
     /**
