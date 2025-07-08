@@ -4,7 +4,6 @@ import chat.giga.model.ModelName;
 import chat.giga.model.completion.ChatMessageRole;
 import chat.giga.model.completion.CompletionResponse;
 import com.sushkomihail.llmagent.datastructures.LoanOffer;
-import com.sushkomihail.llmagent.datastructures.Saving;
 import com.sushkomihail.llmagent.requests.LoanOfferRequest;
 import com.sushkomihail.llmagent.requests.SavingsForecastRequest;
 import com.sushkomihail.llmagent.responsehandlers.SavingsForecastResponseHandler;
@@ -18,6 +17,11 @@ public class LlmAgentController {
         this.agent = agent;
     }
 
+    /**
+     * Получение массива кредитных предложений от определенного банка
+     * @param request - объект содержащий запрос к нейросети
+     * @return массив кредитных предложений
+     */
     public List<LoanOffer> getLoanOffers(LoanOfferRequest request) {
         agent.deleteAllFiles();
         agent.clearMessagesHistory();
