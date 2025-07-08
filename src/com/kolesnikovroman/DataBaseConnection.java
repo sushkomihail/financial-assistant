@@ -1,8 +1,14 @@
 // Файл: src/main/java/com/kolesnikovroman/DataBaseConnection.java
 package com.kolesnikovroman;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DataBaseConnection {
     public static void main(String[] args) {
@@ -41,10 +47,26 @@ public class DataBaseConnection {
             List<CreditOfferDTO> creditOffers = repository.findAllCreditOffers();
             System.out.println("Найдено предложений: " + creditOffers.size());
             for (CreditOfferDTO offer : creditOffers) {
-                // Выводим данные через удобный метод toString()
+
                 System.out.println("  -> " + offer);
             }
+            System.out.println("\n--- Общая финансовая сводка по месяцам  ---");
 
+            // 1. Работай пожалуйста
+            List<MonthlyFinancialSummaryDTO> summaryList = repository.getMonthlyFinancialSummary();
+
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("LLLL yyyy", new Locale("ru"));
+            System.out.printf("%-18s | %12s | %12s | %12s%n", "Месяц", "Доход", "Расход", "Прибыль");
+            System.out.println(new String(new char[64]).replace("\0", "-"));
+
+            for (MonthlyFinancialSummaryDTO summary : summaryList) {
+                System.out.printf("%-18s | %12.2f | %12.2f | %12.2f%n",
+                        summary.getMonth().format(formatter),
+                        summary.getTotalIncome(),
+                        summary.getTotalExpense(),
+                        summary.getProfit());
+            }
         } catch (SQLException e) {
             System.err.println("Произошла ошибка при доступе к данным.");
             e.printStackTrace();
