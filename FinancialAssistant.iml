@@ -16,5 +16,14 @@
     <orderEntry type="library" name="chat.giga.gigachat.java" level="project" />
     <orderEntry type="library" name="jsoup" level="project" />
     <orderEntry type="library" name="Python 3.13 (FinancialAssistant) interpreter library" level="application" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/postgresql-42.7.7.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
