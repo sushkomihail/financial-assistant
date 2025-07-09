@@ -1,26 +1,22 @@
+// Файл: src/main/java/com/kolesnikovroman/ExpenseDTO.java
 package com.kolesnikovroman;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class ExpenseDTO {
-    private final long id;
+    // Поле 'id' удалено
     private final BigDecimal amount;
     private final LocalDate transactionDate;
     private final String comment;
-    // Можно также добавить categoryId или categoryName, если нужно
 
-    public ExpenseDTO(long id, BigDecimal amount, LocalDate transactionDate, String comment) {
-        this.id = id;
+
+    public ExpenseDTO(BigDecimal amount, LocalDate transactionDate, String comment) {
         this.amount = amount;
         this.transactionDate = transactionDate;
         this.comment = comment;
     }
 
-    // Геттеры
-    public long getId() {
-        return id;
-    }
 
     public BigDecimal getAmount() {
         return amount;
@@ -36,9 +32,9 @@ public class ExpenseDTO {
 
     @Override
     public String toString() {
+
         return "ExpenseDTO{" +
-                "id=" + id +
-                ", amount=" + amount +
+                "amount=" + amount +
                 ", transactionDate=" + transactionDate +
                 ", comment='" + comment + '\'' +
                 '}';

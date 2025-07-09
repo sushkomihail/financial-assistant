@@ -44,7 +44,8 @@ public class FinancialRepository {
      */
     public List<ExpenseDTO> findExpensesByCategoryName(String categoryName) throws SQLException {
         List<ExpenseDTO> expenses = new ArrayList<>();
-        String sql = "SELECT e.id, e.amount, e.transaction_date, e.comment " +
+
+        String sql = "SELECT e.amount, e.transaction_date, e.comment " +
                 "FROM expenses e " +
                 "JOIN expense_categories ec ON e.category_id = ec.id " +
                 "WHERE ec.name = ?";
@@ -55,11 +56,12 @@ public class FinancialRepository {
             preparedStatement.setString(1, categoryName);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    long id = resultSet.getLong("id");
+                    // Больше не читаем ID из ResultSet
                     BigDecimal amount = resultSet.getBigDecimal("amount");
                     LocalDate date = resultSet.getDate("transaction_date").toLocalDate();
                     String comment = resultSet.getString("comment");
-                    expenses.add(new ExpenseDTO(id, amount, date, comment));
+
+                    expenses.add(new ExpenseDTO(amount, date, comment));
                 }
             }
         }
@@ -104,11 +106,10 @@ public class FinancialRepository {
     }
 
 
-    // Нужно добавить в таблицу поле 'название кредитного продукта' (product_name)
     public List<LoanOfferDTO> findAllCreditOffers() throws SQLException {
         List<LoanOfferDTO> offers = new ArrayList<>();
-        // Запрос к таблице с упрощенными именами колонок
-        String sql = "SELECT id, bank_name, amount, rate, term, total_cost FROM credit_offers ORDER BY bank_name;";
+        // ОБНОВЛЕННЫЙ SQL: Добавили 'product_name' в список полей для выборки
+        String sql = "SELECT bank_name, product_name, amount, rate, term, total_cost FROM credit_offers ORDER BY bank_name;";
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement();
@@ -116,13 +117,14 @@ public class FinancialRepository {
 
             while (resultSet.next()) {
                 String bankName = resultSet.getString("bank_name");
+                String productName = resultSet.getString("product_name"); // <-- Читаем новое поле
                 String amount = resultSet.getString("amount");
                 String rate = resultSet.getString("rate");
                 String term = resultSet.getString("term");
                 String totalCost = resultSet.getString("total_cost");
 
-                // Создаем DTO и добавляем в список
-                // offers.add(new LoanOfferDTO(bankName, amount, rate, term, totalCost));
+
+                offers.add(new LoanOfferDTO(bankName, productName, amount, rate, term, totalCost));
             }
         }
         return offers;
