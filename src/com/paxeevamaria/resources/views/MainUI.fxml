@@ -23,17 +23,6 @@
 
         <HBox spacing="20">
             <VBox spacing="10" styleClass="dashboard-card">
-                <Label text="Прогноз накоплений" styleClass="card-header"/>
-                <LineChart fx:id="savingsChart">
-                    <xAxis><CategoryAxis /></xAxis>
-                    <yAxis><NumberAxis /></yAxis>
-                </LineChart>
-                <ProgressIndicator fx:id="lineChartLoading" visible="false"/>
-            </VBox>
-        </HBox>
-
-        <HBox spacing="20">
-            <VBox spacing="10" styleClass="dashboard-card">
                 <Label text="Расходы по категориям" styleClass="card-header"/>
                 <StackPane>
                     <PieChart fx:id="expensePieChart"/>
@@ -48,6 +37,17 @@
                     <yAxis><NumberAxis /></yAxis>
                 </BarChart>
                 <ProgressIndicator fx:id="barChartLoading" visible="false"/>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="20">
+            <VBox spacing="10" styleClass="dashboard-card">
+                <Label text="Прогноз накоплений" styleClass="card-header"/>
+                <LineChart fx:id="savingsChart">
+                    <xAxis><CategoryAxis /></xAxis>
+                    <yAxis><NumberAxis /></yAxis>
+                </LineChart>
+                <ProgressIndicator fx:id="lineChartLoading" visible="false"/>
             </VBox>
         </HBox>
     </VBox>

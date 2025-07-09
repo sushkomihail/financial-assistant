@@ -32,6 +32,10 @@ public class MainUIController {
     private LineChart<String, Number> savingsChart; // Линейный график накоплений
     @FXML
     private ProgressIndicator pieChartLoading; // Индикатор загрузки для круговой диаграммы
+    @FXML
+    private ProgressIndicator barChartLoading; // Индикатор загрузки для столбчатой диаграммы
+    @FXML
+    private ProgressIndicator lineChartLoading; // Индикатор загрузки для графика накоплений
 
     private LlmAgentController llmAgentController;
     private FinancialRepository financialRepository;
@@ -47,7 +51,7 @@ public class MainUIController {
     private void updateCharts() {
         updateExpensePieChart();
         updateIncomeExpenseBarChart();
-        updateSavingsChart();
+        //updateSavingsChart();
     }
 
     // Метод для обновления круговой диаграммы расходов
@@ -88,31 +92,155 @@ public class MainUIController {
         new Thread(task).start(); // Запуск задачи в отдельном потоке
     }
 
-    // Метод для обновления столбчатой диаграммы доходов/расходов
     private void updateIncomeExpenseBarChart() {
-        CategoryAxis xAxis = (CategoryAxis) incomeExpenseBarChart.getXAxis();
-        xAxis.setLabel("Месяц");
+        incomeExpenseBarChart.getData().clear();
+        incomeExpenseBarChart.setVisible(false);
+        barChartLoading.setVisible(true);
 
-        XYChart.Series<String, Number> incomeSeries = new XYChart.Series<>();
-        incomeSeries.setName("Доходы");
-        incomeSeries.getData().add(new XYChart.Data<>("Янв", 50000));
-        incomeSeries.getData().add(new XYChart.Data<>("Фев", 52000));
-        incomeSeries.getData().add(new XYChart.Data<>("Мар", 48000));
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                try {
+                    List<MonthlyFinancialSummaryDTO> summaries = financialRepository.getMonthlyFinancialSummary();
 
-        XYChart.Series<String, Number> expenseSeries = new XYChart.Series<>();
-        expenseSeries.setName("Расходы");
-        expenseSeries.getData().add(new XYChart.Data<>("Янв", 35000));
-        expenseSeries.getData().add(new XYChart.Data<>("Фев", 38000));
-        expenseSeries.getData().add(new XYChart.Data<>("Мар", 32000));
+                    if (summaries.size() > 3) {
+                        summaries = summaries.subList(summaries.size() - 3, summaries.size());
+                    }
 
-        incomeExpenseBarChart.getData().addAll(incomeSeries, expenseSeries);
+                    XYChart.Series<String, Number> incomeSeries = new XYChart.Series<>();
+                    incomeSeries.setName("Доходы");
+                    XYChart.Series<String, Number> expenseSeries = new XYChart.Series<>();
+                    expenseSeries.setName("Расходы");
+
+                    String[] monthNames = {"Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                            "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"};
+
+                    ObservableList<String> categories = FXCollections.observableArrayList();
+
+                    for (MonthlyFinancialSummaryDTO summary : summaries) {
+                        String monthLabel = monthNames[summary.getMonth().getMonthValue() - 1];
+                        categories.add(monthLabel);
+
+                        incomeSeries.getData().add(new XYChart.Data<>(
+                                monthLabel,
+                                summary.getTotalIncome()
+                        ));
+
+                        expenseSeries.getData().add(new XYChart.Data<>(
+                                monthLabel,
+                                summary.getTotalExpense()
+                        ));
+                    }
+
+                    Platform.runLater(() -> {
+                        // Настройка осей
+                        CategoryAxis xAxis = (CategoryAxis) incomeExpenseBarChart.getXAxis();
+                        xAxis.setCategories(categories);
+                        xAxis.setLabel("Месяц");
+
+                        NumberAxis yAxis = (NumberAxis) incomeExpenseBarChart.getYAxis();
+                        yAxis.setLabel("Сумма (руб)");
+
+                        // Добавление данных
+                        incomeExpenseBarChart.getData().addAll(incomeSeries, expenseSeries);
+
+                        // Настройка внешнего вида
+                        incomeExpenseBarChart.setCategoryGap(20);
+                        incomeExpenseBarChart.setBarGap(10);
+
+                        incomeExpenseBarChart.setVisible(true);
+                        barChartLoading.setVisible(false);
+                    });
+
+                } catch (SQLException e) {
+                    Platform.runLater(() -> {
+                        barChartLoading.setVisible(false);
+                        showErrorDialog("Не удалось загрузить данные для графика: " + e.getMessage());
+                    });
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
     }
+
+//    // Метод для обновления столбчатой диаграммы доходов/расходов
+//    private void updateIncomeExpenseBarChart() {
+//        incomeExpenseBarChart.getData().clear();
+//
+//        incomeExpenseBarChart.setVisible(false);
+//        barChartLoading.setVisible(true);
+//
+//        // Создание задачи для загрузки данных в фоновом потоке
+//        Task<Void> task = new Task<>() {
+//            @Override
+//            protected Void call() throws Exception {
+//                try {
+//                    // Получение данных за последние 3 месяца
+//                    List<MonthlyFinancialSummaryDTO> summaries = financialRepository.getMonthlyFinancialSummary();
+//
+//                    if (summaries.size() > 3) {
+//                        summaries = summaries.subList(summaries.size() - 3, summaries.size());
+//                    }
+//
+//                    // Формирование серии данных
+//                    XYChart.Series<String, Number> incomeSeries = new XYChart.Series<>();
+//                    incomeSeries.setName("Доходы");
+//                    XYChart.Series<String, Number> expenseSeries = new XYChart.Series<>();
+//                    expenseSeries.setName("Расходы");
+//
+//                    String[] monthNames = {"Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+//                            "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"};
+//
+//                    for (MonthlyFinancialSummaryDTO summary : summaries) {
+//                        String monthLabel = monthNames[summary.getMonth().getMonthValue() - 1];
+//
+//                        incomeSeries.getData().add(new XYChart.Data<>(
+//                                monthLabel,
+//                                summary.getTotalIncome()
+//                        ));
+//
+//                        expenseSeries.getData().add(new XYChart.Data<>(
+//                                monthLabel,
+//                                summary.getTotalExpense()
+//                        ));
+//                    }
+//
+//                    // Обновление UI в основном потоке
+//                    Platform.runLater(() -> {
+//                        incomeExpenseBarChart.getData().addAll(incomeSeries, expenseSeries);
+//
+//                        // Настройка осей
+//                        CategoryAxis xAxis = (CategoryAxis) incomeExpenseBarChart.getXAxis();
+//                        xAxis.setLabel("Месяц");
+//
+//                        NumberAxis yAxis = (NumberAxis) incomeExpenseBarChart.getYAxis();
+//                        yAxis.setLabel("Сумма (руб)");
+//
+//                        incomeExpenseBarChart.setVisible(true);
+//                        barChartLoading.setVisible(false);
+//
+//                        incomeExpenseBarChart.requestLayout();
+//                    });
+//
+//                } catch (SQLException e) {
+//                    Platform.runLater(() -> {
+//                        barChartLoading.setVisible(false);
+//                        showErrorDialog("Не удалось загрузить данные для графика: " + e.getMessage());
+//                    });
+//                }
+//                return null;
+//            }
+//        };
+//
+//        new Thread(task).start();
+//    }
 
     // Метод для обновления графика накоплений
     private void updateSavingsChart() {
         savingsChart.setVisible(false);
-        ProgressIndicator savingsLoading = new ProgressIndicator();
-        savingsLoading.setVisible(true);
+        lineChartLoading.setVisible(true);
 
         Task<XYChart.Series<String, Number>> task = new Task<>() {
             @Override
@@ -177,7 +305,7 @@ public class MainUIController {
                 yAxis.setLabel("Сумма (руб)");
 
                 savingsChart.setVisible(true);
-                savingsLoading.setVisible(false);
+                lineChartLoading.setVisible(false);
 
                 // Принудительное обновление графика
                 savingsChart.requestLayout();
@@ -186,7 +314,7 @@ public class MainUIController {
 
         task.setOnFailed(e -> {
             Platform.runLater(() -> {
-                savingsLoading.setVisible(false);
+                lineChartLoading.setVisible(false);
                 showErrorDialog("Не удалось получить прогноз накоплений: " +
                         task.getException().getMessage());
             });

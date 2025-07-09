@@ -2,6 +2,7 @@ package com.paxeevamaria;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Properties;
 
 import com.paxeevamaria.logic.IncomeController;
@@ -10,8 +11,11 @@ import com.paxeevamaria.logic.RootController;
 import com.sushkomihail.llmagent.GigaChatAgent;
 import com.sushkomihail.llmagent.LlmAgentController;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -24,6 +28,7 @@ public class App extends Application {
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Финансовый ассистент");
+        this.primaryStage.setMaximized(true);
 
         initRootLayout();
         showDashboard();
@@ -69,7 +74,19 @@ public class App extends Application {
         }
     }
 
-    public void exit() {}
+    public void exit() {
+        // Диалог подтверждения перед выходом
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Подтверждение выхода");
+        alert.setHeaderText("Вы уверены, что хотите выйти?");
+        alert.setContentText("Все несохраненные данные будут потеряны.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            Platform.exit();
+            System.exit(0);
+        }
+    }
 
     public void showIncome() {
         try {
