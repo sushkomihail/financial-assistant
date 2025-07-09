@@ -1,9 +1,13 @@
 package com.sushkomihail;
 
+import com.kolesnikovroman.LoanOfferDTO;
 import com.sushkomihail.llmagent.GigaChatAgent;
 import com.sushkomihail.llmagent.LlmAgentController;
+import com.sushkomihail.llmagent.requests.LoanOfferRequest;
+import com.sushkomihail.llmagent.requests.MimeType;
 
 import java.io.FileInputStream;
+import java.util.List;
 import java.util.Properties;
 
 public class Main {
@@ -25,12 +29,10 @@ public class Main {
 //                            Arrays.asList(10000, 13000, 25000, 12500))));
 //            System.out.println(savings.toString());
 
-            // Пример получения рекомендаций по кредитному предложению
-            controller.getLoanRecommendation();
-
-            // controller.getLoanOffers(new LoanOfferRequest(MimeType.PDF, "sber.pdf"));
-//            System.out.println(gigaChatAgent.handleRequest(
-//                    new LoanOffersRequest("")));
+            // Пример получения кредитных предложений от конкретного банка
+            List<LoanOfferDTO> loanOffers = controller.getLoanOffers(
+                    null, new LoanOfferRequest(MimeType.PDF, "sber.pdf"));
+            System.out.println(loanOffers.toString());
 
 
             // --------------- Analytics -----------------

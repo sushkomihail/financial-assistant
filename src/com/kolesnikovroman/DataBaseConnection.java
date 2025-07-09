@@ -1,14 +1,10 @@
 // Файл: src/main/java/com/kolesnikovroman/DataBaseConnection.java
 package com.kolesnikovroman;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class DataBaseConnection {
     public static void main(String[] args) {
@@ -44,9 +40,9 @@ public class DataBaseConnection {
 
             // --- Получение кредитных предложений ---
             System.out.println("\n--- Получение всех кредитных предложений из базы ---");
-            List<CreditOfferDTO> creditOffers = repository.findAllCreditOffers();
+            List<LoanOfferDTO> creditOffers = repository.findAllCreditOffers();
             System.out.println("Найдено предложений: " + creditOffers.size());
-            for (CreditOfferDTO offer : creditOffers) {
+            for (LoanOfferDTO offer : creditOffers) {
 
                 System.out.println("  -> " + offer);
             }

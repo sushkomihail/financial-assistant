@@ -104,10 +104,9 @@ public class FinancialRepository {
     }
 
 
-
-
-    public List<CreditOfferDTO> findAllCreditOffers() throws SQLException {
-        List<CreditOfferDTO> offers = new ArrayList<>();
+    // Нужно добавить в таблицу поле 'название кредитного продукта' (product_name)
+    public List<LoanOfferDTO> findAllCreditOffers() throws SQLException {
+        List<LoanOfferDTO> offers = new ArrayList<>();
         // Запрос к таблице с упрощенными именами колонок
         String sql = "SELECT id, bank_name, amount, rate, term, total_cost FROM credit_offers ORDER BY bank_name;";
 
@@ -116,7 +115,6 @@ public class FinancialRepository {
              ResultSet resultSet = statement.executeQuery(sql)) {
 
             while (resultSet.next()) {
-                long id = resultSet.getLong("id");
                 String bankName = resultSet.getString("bank_name");
                 String amount = resultSet.getString("amount");
                 String rate = resultSet.getString("rate");
@@ -124,7 +122,7 @@ public class FinancialRepository {
                 String totalCost = resultSet.getString("total_cost");
 
                 // Создаем DTO и добавляем в список
-                offers.add(new CreditOfferDTO(id, bankName, amount, rate, term, totalCost));
+                // offers.add(new LoanOfferDTO(bankName, amount, rate, term, totalCost));
             }
         }
         return offers;
