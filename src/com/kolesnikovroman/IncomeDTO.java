@@ -5,18 +5,24 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class IncomeDTO {
-
+    private final long id;
     private final BigDecimal amount;
     private final LocalDate transactionDate;
     private final String comment;
+    private final String categoryName;
 
-
-    public IncomeDTO(BigDecimal amount, LocalDate transactionDate, String comment) {
+    public IncomeDTO(long id, BigDecimal amount, LocalDate transactionDate, String comment, String categoryName) {
+        this.id = id;
         this.amount = amount;
         this.transactionDate = transactionDate;
         this.comment = comment;
+        this.categoryName = categoryName;
     }
 
+    // Геттеры
+    public long getId() {
+        return id;
+    }
 
     public BigDecimal getAmount() {
         return amount;
@@ -30,11 +36,16 @@ public class IncomeDTO {
         return comment;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
     @Override
     public String toString() {
-
         return "IncomeDTO{" +
-                "amount=" + amount +
+                "id=" + id +
+                ", categoryName='" + categoryName + '\'' +
+                ", amount=" + amount +
                 ", transactionDate=" + transactionDate +
                 ", comment='" + comment + '\'' +
                 '}';
