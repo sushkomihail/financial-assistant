@@ -31,15 +31,7 @@ public class LlmAgentController {
         agent.addMessageToHistory(ChatMessageRole.SYSTEM, request.getRequest(),
                 new ArrayList<>(Collections.singletonList(fileId.toString())));
 
-        String responseContent =
-                agent.handleRequest(ModelName.GIGA_CHAT).choices().get(0).message().content();
-
-        agent.addMessageToHistory(ChatMessageRole.ASSISTANT, responseContent, null);
-        agent.addMessageToHistory(
-                ChatMessageRole.USER, LoanOfferRequest.PARAMETER_GENERATION_REQUEST, null);
-
-        CompletionResponse response =
-                agent.handleRequestWithFunction(ModelName.GIGA_CHAT, request.getLlmAgentFunction());
+        CompletionResponse response = agent.handleRequest(ModelName.GIGA_CHAT);
         LoanOfferResponseHandler responseHandler = new LoanOfferResponseHandler(bankName, response);
         return responseHandler.handle();
     }
