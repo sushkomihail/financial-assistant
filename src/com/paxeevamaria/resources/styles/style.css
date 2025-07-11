@@ -36,3 +36,19 @@
 .menu-bar .menu-item {
     -fx-text-fill: #2c3e50;
 }
+
+
+// ---- credits ------
+.credits-container {
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+}
+
+.scroll-pane {
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}

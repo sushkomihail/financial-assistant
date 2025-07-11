@@ -3,6 +3,9 @@ package com.sushkomihail.llmagent.datastructures;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Структура, хранящая чистый доход по месяцам за определенный период
+ */
 public class NetIncomesCollection {
     private final List<Integer> netIncomes = new ArrayList<>();
 

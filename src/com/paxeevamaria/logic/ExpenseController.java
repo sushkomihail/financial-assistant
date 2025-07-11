@@ -3,8 +3,6 @@ package com.paxeevamaria.logic;
 import com.kolesnikovroman.CategorySummaryDTO;
 import com.kolesnikovroman.ExpenseDTO;
 import com.kolesnikovroman.FinancialRepository;
-import com.kolesnikovroman.IncomeDTO;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -12,30 +10,28 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class IncomeController {
+public class ExpenseController {
     @FXML private ComboBox<String> categoryComboBox;
     @FXML private DatePicker startDatePicker;
     @FXML private DatePicker endDatePicker;
     @FXML private Label totalAmountLabel;
     @FXML private Label recordsCountLabel;
-    @FXML private Label averageAmountLabel;
-    @FXML private TableView<IncomeDTO> incomesTable;
-    @FXML private TableColumn<IncomeDTO, LocalDate> dateColumn;
-    @FXML private TableColumn<IncomeDTO, String> categoryColumn;
-    @FXML private TableColumn<IncomeDTO, BigDecimal> amountColumn;
-    @FXML private TableColumn<IncomeDTO, String> commentColumn;
+    @FXML private TableView<ExpenseDTO> expensesTable;
+    @FXML private TableColumn<ExpenseDTO, LocalDate> dateColumn;
+    @FXML private TableColumn<ExpenseDTO, String> categoryColumn;
+    @FXML private TableColumn<ExpenseDTO, BigDecimal> amountColumn;
+    @FXML private TableColumn<ExpenseDTO, String> commentColumn;
     @FXML private Pagination pagination;
     @FXML private ComboBox<Integer> itemsPerPageComboBox;
 
     private FinancialRepository financialRepository;
-    private ObservableList<IncomeDTO> allIncomes = FXCollections.observableArrayList();
+    private ObservableList<ExpenseDTO> allExpenses = FXCollections.observableArrayList();
     private ObservableList<String> allCategories = FXCollections.observableArrayList();
     private int itemsPerPage = 10;
 
@@ -45,11 +41,7 @@ public class IncomeController {
 
         // Initialize table columns
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
-        categoryColumn.setCellValueFactory(cellData -> {
-            // Здесь можно добавить логику получения названия категории по categoryId
-            // В текущей реализации IncomeDTO нет поля categoryName, поэтому используем заглушку
-            return new SimpleStringProperty("Категория");
-        });
+        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         commentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
 
@@ -76,12 +68,12 @@ public class IncomeController {
 
         // Load initial data
         loadCategories();
-        loadIncomes();
+        loadExpenses();
     }
 
     private void loadCategories() {
         try {
-            List<CategorySummaryDTO> categories = financialRepository.getCurrentMonthIncomeSummary();
+            List<CategorySummaryDTO> categories = financialRepository.getLastMonthSummary();
             allCategories.clear();
             allCategories.add("Все категории");
             allCategories.addAll(categories.stream()
@@ -91,50 +83,52 @@ public class IncomeController {
             categoryComboBox.setItems(allCategories);
             categoryComboBox.getSelectionModel().selectFirst();
         } catch (SQLException e) {
-            showError("Ошибка загрузки категорий доходов", e.getMessage());
+            showError("Ошибка загрузки категорий", e.getMessage());
         }
     }
 
-    private void loadIncomes() {
+    private void loadExpenses() {
         try {
-            //List<IncomeDTO> incomes = financialRepository.getAllIncomes();
-            List<IncomeDTO> incomes = Arrays.asList(
-                    new IncomeDTO(1L,
+            // Load all expenses initially
+            // Note: In a real application, you might want to load paginated data from DB
+            //List<ExpenseDTO> expenses = financialRepository.getAllExpenses();
+            List<ExpenseDTO> expenses = Arrays.asList(
+                    new ExpenseDTO(1L,
                             new BigDecimal("1500.50"),
                             LocalDate.of(2023, 5, 10),
                             "Продукты в Пятерочке"),
 
-                    new IncomeDTO(2L,
+                    new ExpenseDTO(2L,
                             new BigDecimal("3200.00"),
                             LocalDate.of(2023, 5, 15),
                             "Оплата аренды квартиры"),
 
-                    new IncomeDTO(3L,
+                    new ExpenseDTO(3L,
                             new BigDecimal("750.30"),
                             LocalDate.of(2023, 5, 18),
                             "Бензин на АЗС Лукойл"),
 
-                    new IncomeDTO(4L,
+                    new ExpenseDTO(4L,
                             new BigDecimal("1200.00"),
                             LocalDate.of(2023, 6, 2),
                             "Обед в ресторане"),
 
-                    new IncomeDTO(5L,
+                    new ExpenseDTO(5L,
                             new BigDecimal("4500.00"),
                             LocalDate.of(2023, 6, 5),
                             "Новые кроссовки")
             );
-            allIncomes.setAll(incomes);
+            allExpenses.setAll(expenses);
 
             updateTable();
             updateSummary();
             updatePagination();
-//        } catch (SQLException e) {
-//            showError("Ошибка загрузки доходов", e.getMessage());
-//        }
         } catch (Exception e) {
-            showError("Ошибка загрузки доходов", e.getMessage());
+            showError("Ошибка загрузки расходов", e.getMessage());
         }
+//        } catch (SQLException e) {
+//            showError("Ошибка загрузки расходов", e.getMessage());
+//        }
     }
 
     @FXML
@@ -143,24 +137,25 @@ public class IncomeController {
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
 
-        ObservableList<IncomeDTO> filtered = allIncomes.filtered(income -> {
-            // Фильтр по категории временно отключен, т.к. IncomeDTO не содержит categoryName
-            // if (selectedCategory != null && !selectedCategory.equals("Все категории")) {
-            //     return false;
-            // }
+        ObservableList<ExpenseDTO> filtered = allExpenses.filtered(expense -> {
+            // Filter by category
+//            if (selectedCategory != null && !selectedCategory.equals("Все категории")
+//                    && !expense.getCategoryName().equals(selectedCategory)) {
+//                return false;
+//            }
 
             // Filter by date range
-            if (startDate != null && income.getTransactionDate().isBefore(startDate)) {
+            if (startDate != null && expense.getTransactionDate().isBefore(startDate)) {
                 return false;
             }
-            if (endDate != null && income.getTransactionDate().isAfter(endDate)) {
+            if (endDate != null && expense.getTransactionDate().isAfter(endDate)) {
                 return false;
             }
 
             return true;
         });
 
-        incomesTable.setItems(filtered);
+        expensesTable.setItems(filtered);
         updateSummary();
     }
 
@@ -169,12 +164,12 @@ public class IncomeController {
         categoryComboBox.getSelectionModel().selectFirst();
         startDatePicker.setValue(null);
         endDatePicker.setValue(null);
-        incomesTable.setItems(allIncomes);
+        expensesTable.setItems(allExpenses);
         updateSummary();
     }
 
     private void updateTable() {
-        int totalItems = allIncomes.size();
+        int totalItems = allExpenses.size();
         int pageCount = (int) Math.ceil((double) totalItems / itemsPerPage);
 
         pagination.setPageCount(pageCount);
@@ -182,33 +177,25 @@ public class IncomeController {
         pagination.setPageFactory(pageIndex -> {
             int fromIndex = pageIndex * itemsPerPage;
             int toIndex = Math.min(fromIndex + itemsPerPage, totalItems);
-            incomesTable.setItems(FXCollections.observableArrayList(
-                    allIncomes.subList(fromIndex, toIndex)));
-            return incomesTable;
+            expensesTable.setItems(FXCollections.observableArrayList(
+                    allExpenses.subList(fromIndex, toIndex)));
+            return expensesTable;
         });
     }
 
     private void updatePagination() {
-        int totalItems = incomesTable.getItems().size();
+        int totalItems = expensesTable.getItems().size();
         int pageCount = (int) Math.ceil((double) totalItems / itemsPerPage);
         pagination.setPageCount(pageCount > 0 ? pageCount : 1);
     }
 
     private void updateSummary() {
-        List<IncomeDTO> currentIncomes = incomesTable.getItems();
-        int count = currentIncomes.size();
-
-        BigDecimal total = currentIncomes.stream()
-                .map(IncomeDTO::getAmount)
+        BigDecimal total = expensesTable.getItems().stream()
+                .map(ExpenseDTO::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal average = count > 0
-                ? total.divide(new BigDecimal(count), 2, RoundingMode.HALF_UP)
-                : BigDecimal.ZERO;
-
         totalAmountLabel.setText(String.format("%,.2f ₽", total));
-        recordsCountLabel.setText(String.valueOf(count));
-        averageAmountLabel.setText(String.format("%,.2f ₽", average));
+        recordsCountLabel.setText(String.valueOf(expensesTable.getItems().size()));
     }
 
     private void showError(String title, String message) {

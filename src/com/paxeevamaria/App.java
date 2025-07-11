@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
 
-import com.paxeevamaria.logic.IncomeController;
-import com.paxeevamaria.logic.MainUIController;
-import com.paxeevamaria.logic.RootController;
+import com.paxeevamaria.logic.*;
 import com.sushkomihail.llmagent.GigaChatAgent;
 import com.sushkomihail.llmagent.LlmAgentController;
 import javafx.application.Application;
@@ -16,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -23,6 +22,7 @@ import javafx.stage.Stage;
 public class App extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
+    private LlmAgentController llmAgentController;
 
     @Override
     public void start(Stage primaryStage) {
@@ -60,14 +60,15 @@ public class App extends Application {
             MainUIController controller = loader.getController();
 
 //          --------------- GIGA CHAT -----------------
-            Properties props = new Properties();
-            FileInputStream configFile = new FileInputStream("gigachatapi.properties");
-            props.load(configFile);
-            String authKey = props.getProperty("auth_key");
+//            Properties props = new Properties();
+//            FileInputStream configFile = new FileInputStream("gigachatapi.properties");
+//            props.load(configFile);
+//            String authKey = props.getProperty("auth_key");
+//
+//            GigaChatAgent gigaChatAgent = new GigaChatAgent(authKey);
+//            LlmAgentController llmAgentController = new LlmAgentController(gigaChatAgent);
 
-            GigaChatAgent gigaChatAgent = new GigaChatAgent(authKey);
-            LlmAgentController llmAgentController = new LlmAgentController(gigaChatAgent);
-
+            initGigaChat();
             controller.setMainPanel(llmAgentController);
         } catch (IOException e) {
             e.printStackTrace();
@@ -97,17 +98,57 @@ public class App extends Application {
             rootLayout.setCenter(incomePanel);
 
             IncomeController controller = loader.getController();
-            controller.setMainPanel();
+            controller.initialize();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void showExpense() {}
+    public void showExpense() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(App.class.getResource("./resources/views/Expense.fxml"));
+            AnchorPane expensePanel = loader.load();
 
-    public void showCredits() {}
+            rootLayout.setCenter(expensePanel);
+
+            ExpenseController controller = loader.getController();
+            controller.initialize();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void showCredits() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(App.class.getResource("./resources/views/Credits.fxml"));
+            ScrollPane creditsPanel = loader.load();
+
+            rootLayout.setCenter(creditsPanel);
+
+            CreditsController controller = loader.getController();
+            controller.initialize(this.llmAgentController);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+//            showAlert("Ошибка", "Не удалось загрузить кредитные предложения", e.getMessage());
+        }
+    }
+   // public void showCredits() {}
 
     public void showSavings() {}
+
+    private void initGigaChat() throws IOException {
+        Properties props = new Properties();
+        FileInputStream configFile = new FileInputStream("gigachatapi.properties");
+        props.load(configFile);
+        String authKey = props.getProperty("auth_key");
+
+        GigaChatAgent gigaChatAgent = new GigaChatAgent(authKey);
+        this.llmAgentController = new LlmAgentController(gigaChatAgent);
+    }
 
     public static void main(String[] args) {
         launch(args);

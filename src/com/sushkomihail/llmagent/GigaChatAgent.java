@@ -8,8 +8,6 @@ import chat.giga.model.Scope;
 import chat.giga.model.completion.*;
 import chat.giga.model.file.FileResponse;
 import chat.giga.model.file.UploadFileRequest;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sushkomihail.llmagent.requests.LlmAgentRequest;
 
 import java.io.IOException;
@@ -79,19 +77,20 @@ public class GigaChatAgent {
         }
     }
 
-    public CompletionResponse handleRequestWithFunction(String model, LlmAgentRequest request) {
+    public CompletionResponse handleRequestWithFunction(String model, ChatFunction function) {
         try {
             var requestBuilder = CompletionRequest.builder();
             requestBuilder.model(model);
             requestBuilder.messages(messagesHistory);
             requestBuilder.temperature(0.001F);
 
-            var function = request.getLlmAgentFunction();
-
             if (function == null) {
                 return null;
             }
 
+            requestBuilder.functionCall(ChatFunctionCall.builder()
+                            .name(function.name())
+                    .build());
             requestBuilder.function(function);
             return client.completions(requestBuilder.build());
         } catch (HttpClientException e) {

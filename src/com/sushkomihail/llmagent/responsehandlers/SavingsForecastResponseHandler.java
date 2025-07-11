@@ -8,20 +8,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SavingsForecastResponseHandler extends LlmAgentResponseHandler {
-    private final List<Integer> savings = new ArrayList<>();
-
+public class SavingsForecastResponseHandler extends LlmAgentResponseHandler<List<Integer>> {
     public SavingsForecastResponseHandler(CompletionResponse response) {
         super(response);
         handle();
     }
 
-    public List<Integer> getSavings() {
-        return savings;
-    }
-
     @Override
-    protected void handle() {
+    public List<Integer> handle() {
+        List<Integer> savings = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
 
         try {
@@ -37,5 +32,7 @@ public class SavingsForecastResponseHandler extends LlmAgentResponseHandler {
         } catch (JsonProcessingException e) {
             System.err.println("Unable to convert to json. Error: " + e.getMessage());
         }
+
+        return savings;
     }
 }

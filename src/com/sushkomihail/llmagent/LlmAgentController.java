@@ -3,10 +3,10 @@ package com.sushkomihail.llmagent;
 import chat.giga.model.ModelName;
 import chat.giga.model.completion.ChatMessageRole;
 import chat.giga.model.completion.CompletionResponse;
-import com.sushkomihail.llmagent.datastructures.LoanOffer;
-import com.sushkomihail.llmagent.datastructures.Saving;
+import com.kolesnikovroman.LoanOfferDTO;
 import com.sushkomihail.llmagent.requests.LoanOfferRequest;
 import com.sushkomihail.llmagent.requests.SavingsForecastRequest;
+import com.sushkomihail.llmagent.responsehandlers.LoanOfferResponseHandler;
 import com.sushkomihail.llmagent.responsehandlers.SavingsForecastResponseHandler;
 
 import java.util.*;
@@ -18,7 +18,12 @@ public class LlmAgentController {
         this.agent = agent;
     }
 
-    public List<LoanOffer> getLoanOffers(LoanOfferRequest request) {
+    /**
+     * Получение массива кредитных предложений от определенного банка
+     * @param request - объект содержащий запрос к нейросети
+     * @return массив кредитных предложений
+     */
+    public List<LoanOfferDTO> getLoanOffers(String bankName, LoanOfferRequest request) {
         agent.deleteAllFiles();
         agent.clearMessagesHistory();
 
@@ -27,15 +32,16 @@ public class LlmAgentController {
                 new ArrayList<>(Collections.singletonList(fileId.toString())));
 
         String responseContent =
-                agent.handleRequest(ModelName.GIGA_CHAT_MAX_2).choices().get(0).message().content();
+                agent.handleRequest(ModelName.GIGA_CHAT).choices().get(0).message().content();
 
         agent.addMessageToHistory(ChatMessageRole.ASSISTANT, responseContent, null);
         agent.addMessageToHistory(
                 ChatMessageRole.USER, LoanOfferRequest.PARAMETER_GENERATION_REQUEST, null);
 
-        var loanParameters = agent.handleRequestWithFunction(ModelName.GIGA_CHAT_MAX_2, request);
-        // System.out.println(loanParameters);
-        return null;
+        CompletionResponse response =
+                agent.handleRequestWithFunction(ModelName.GIGA_CHAT, request.getLlmAgentFunction());
+        LoanOfferResponseHandler responseHandler = new LoanOfferResponseHandler(bankName, response);
+        return responseHandler.handle();
     }
 
     /**
@@ -54,8 +60,9 @@ public class LlmAgentController {
         agent.addMessageToHistory(
                 ChatMessageRole.USER, SavingsForecastRequest.PARAMETER_GENERATION_REQUEST, null);
 
-        CompletionResponse response = agent.handleRequestWithFunction(ModelName.GIGA_CHAT, request);
+        CompletionResponse response =
+                agent.handleRequestWithFunction(ModelName.GIGA_CHAT, request.getLlmAgentFunction());
         SavingsForecastResponseHandler responseHandler = new SavingsForecastResponseHandler(response);
-        return responseHandler.getSavings();
+        return responseHandler.handle();
     }
 }
