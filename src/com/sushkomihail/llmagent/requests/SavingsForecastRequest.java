@@ -3,9 +3,9 @@ package com.sushkomihail.llmagent.requests;
 import chat.giga.model.completion.ChatFunction;
 import chat.giga.model.completion.ChatFunctionParameters;
 import chat.giga.model.completion.ChatFunctionParametersProperty;
-import com.sushkomihail.llmagent.datastructures.NetIncomesCollection;
+import com.sushkomihail.datastructures.NetIncomesCollection;
 
-public class SavingsForecastRequest extends LlmAgentRequest {
+public final class SavingsForecastRequest extends LlmAgentRequest {
     public static final String PARAMETER_GENERATION_REQUEST = "Передай посчитанные значения в функцию";
 
     public SavingsForecastRequest(int forecastPeriod, NetIncomesCollection netIncomes) {

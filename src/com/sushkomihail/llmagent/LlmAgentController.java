@@ -4,9 +4,9 @@ import chat.giga.model.ModelName;
 import chat.giga.model.completion.ChatMessageRole;
 import chat.giga.model.completion.CompletionResponse;
 import com.kolesnikovroman.LoanOfferDTO;
-import com.sushkomihail.llmagent.requests.LoanOfferRequest;
+import com.sushkomihail.llmagent.requests.LoanOffersRequest;
 import com.sushkomihail.llmagent.requests.SavingsForecastRequest;
-import com.sushkomihail.llmagent.responsehandlers.LoanOfferResponseHandler;
+import com.sushkomihail.llmagent.responsehandlers.LoanOffersResponseHandler;
 import com.sushkomihail.llmagent.responsehandlers.SavingsForecastResponseHandler;
 
 import java.util.*;
@@ -23,7 +23,7 @@ public class LlmAgentController {
      * @param request - объект содержащий запрос к нейросети
      * @return массив кредитных предложений
      */
-    public List<LoanOfferDTO> getLoanOffers(String bankName, LoanOfferRequest request) {
+    public List<LoanOfferDTO> getLoanOffers(String bankName, LoanOffersRequest request) {
         agent.deleteAllFiles();
         agent.clearMessagesHistory();
 
@@ -32,7 +32,7 @@ public class LlmAgentController {
                 new ArrayList<>(Collections.singletonList(fileId.toString())));
 
         CompletionResponse response = agent.handleRequest(ModelName.GIGA_CHAT);
-        LoanOfferResponseHandler responseHandler = new LoanOfferResponseHandler(bankName, response);
+        LoanOffersResponseHandler responseHandler = new LoanOffersResponseHandler(bankName, response);
         return responseHandler.handle();
     }
 

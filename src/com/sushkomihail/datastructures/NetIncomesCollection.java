@@ -1,4 +1,4 @@
-package com.sushkomihail.llmagent.datastructures;
+package com.sushkomihail.datastructures;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,7 @@ public class NetIncomesCollection {
 
     private void init(List<Integer> incomes, List<Integer> expenses) {
         if (incomes.size() != expenses.size()) {
+            System.err.println("[ERROR][class NetIncomesCollection]: Массивы доходов и расходов имеют разную длину.");
             return;
         }
 

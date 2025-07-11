@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SavingsForecastResponseHandler extends LlmAgentResponseHandler<List<Integer>> {
+public final class SavingsForecastResponseHandler extends LlmAgentResponseHandler<List<Integer>> {
     public SavingsForecastResponseHandler(CompletionResponse response) {
         super(response);
         handle();

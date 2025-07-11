@@ -9,7 +9,7 @@ public final class AnnuityPaymentLoan extends Loan {
 
     @Override
     protected String getPaymentType() {
-        return "Аннуитетный";
+        return PaymentType.ANNUITY.getTitle();
     }
 
     @Override
