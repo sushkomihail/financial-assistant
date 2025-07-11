@@ -17,6 +17,8 @@
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="jsoup" level="project" />
     <orderEntry type="library" name="Python 3.13 (FinancialAssistant) interpreter library" level="application" />
+    <orderEntry type="library" name="jsoup" level="project" />
+    <orderEntry type="library" name="Python 3.13 (FinancialAssistant) interpreter library" level="application" />
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>

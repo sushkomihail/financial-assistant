@@ -10,7 +10,7 @@ import java.io.FileInputStream;
 import java.util.List;
 import java.util.Properties;
 
-public class  Main {
+public class Main {
     public static void main(String[] args) {
         Properties props = new Properties();
 
@@ -33,9 +33,6 @@ public class  Main {
             List<LoanOfferDTO> loanOffers = controller.getLoanOffers(
                     null, new LoanOfferRequest(MimeType.PDF, "sber.pdf"));
             System.out.println(loanOffers.toString());
-//            List<LoanOfferDTO> loanOffers1 = controller.getLoanOffers(
-//                    null, new LoanOfferRequest(MimeType.PDF, "vtb.pdf"));
-//            System.out.println(loanOffers1.toString());
 
 
             // --------------- Analytics -----------------

@@ -39,13 +39,13 @@ public class ExpenseController {
     public void initialize() {
         financialRepository = new FinancialRepository();
 
-        // Initialize table columns
+        // Инициализация столбцов таблицы
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         commentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
 
-        // Format amount column
+        // Формат отображения суммы
         amountColumn.setCellFactory(tc -> new TableCell<>() {
             @Override
             protected void updateItem(BigDecimal amount, boolean empty) {
@@ -58,7 +58,7 @@ public class ExpenseController {
             }
         });
 
-        // Initialize pagination controls
+        // Управление страницами
         itemsPerPageComboBox.getItems().addAll(5, 10, 20, 50);
         itemsPerPageComboBox.setValue(itemsPerPage);
         itemsPerPageComboBox.setOnAction(e -> {
@@ -66,7 +66,6 @@ public class ExpenseController {
             updatePagination();
         });
 
-        // Load initial data
         loadCategories();
         loadExpenses();
     }
@@ -89,8 +88,6 @@ public class ExpenseController {
 
     private void loadExpenses() {
         try {
-            // Load all expenses initially
-            // Note: In a real application, you might want to load paginated data from DB
             //List<ExpenseDTO> expenses = financialRepository.getAllExpenses();
             List<ExpenseDTO> expenses = Arrays.asList(
                     new ExpenseDTO(1L,
@@ -138,13 +135,13 @@ public class ExpenseController {
         LocalDate endDate = endDatePicker.getValue();
 
         ObservableList<ExpenseDTO> filtered = allExpenses.filtered(expense -> {
-            // Filter by category
+            // Фильтр по категории
 //            if (selectedCategory != null && !selectedCategory.equals("Все категории")
 //                    && !expense.getCategoryName().equals(selectedCategory)) {
 //                return false;
 //            }
 
-            // Filter by date range
+            // Фильтр по дате
             if (startDate != null && expense.getTransactionDate().isBefore(startDate)) {
                 return false;
             }

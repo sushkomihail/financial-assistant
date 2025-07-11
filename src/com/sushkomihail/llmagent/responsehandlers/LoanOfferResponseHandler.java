@@ -23,8 +23,7 @@ public class LoanOfferResponseHandler extends LlmAgentResponseHandler<List<LoanO
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            String arguments =
-                    mapper.writeValueAsString(response.choices().get(0).message().functionCall().arguments());
+            String arguments = response.choices().get(0).message().content();
             JsonNode root = mapper.readTree(arguments);
             JsonNode array = root.get("loan_offers");
 

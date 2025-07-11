@@ -43,17 +43,16 @@ public class IncomeController {
     public void initialize() {
         financialRepository = new FinancialRepository();
 
-        // Initialize table columns
+        // Инициализация столбцов
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
         categoryColumn.setCellValueFactory(cellData -> {
-            // Здесь можно добавить логику получения названия категории по categoryId
             // В текущей реализации IncomeDTO нет поля categoryName, поэтому используем заглушку
             return new SimpleStringProperty("Категория");
         });
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         commentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
 
-        // Format amount column
+        // Формат отображения суммы
         amountColumn.setCellFactory(tc -> new TableCell<>() {
             @Override
             protected void updateItem(BigDecimal amount, boolean empty) {
@@ -66,7 +65,7 @@ public class IncomeController {
             }
         });
 
-        // Initialize pagination controls
+        // Управление страницами
         itemsPerPageComboBox.getItems().addAll(5, 10, 20, 50);
         itemsPerPageComboBox.setValue(itemsPerPage);
         itemsPerPageComboBox.setOnAction(e -> {
@@ -74,7 +73,6 @@ public class IncomeController {
             updatePagination();
         });
 
-        // Load initial data
         loadCategories();
         loadIncomes();
     }
@@ -149,7 +147,7 @@ public class IncomeController {
             //     return false;
             // }
 
-            // Filter by date range
+            // Фильтр по дате
             if (startDate != null && income.getTransactionDate().isBefore(startDate)) {
                 return false;
             }
