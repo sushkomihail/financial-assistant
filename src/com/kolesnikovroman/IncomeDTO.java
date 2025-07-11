@@ -1,4 +1,4 @@
-
+// Файл: src/main/java/com/kolesnikovroman/IncomeDTO.java
 package com.kolesnikovroman;
 
 import java.math.BigDecimal;
@@ -9,13 +9,14 @@ public class IncomeDTO {
     private final BigDecimal amount;
     private final LocalDate transactionDate;
     private final String comment;
-    // Можно также добавить categoryId или categoryName
+    private final String categoryName;
 
-    public IncomeDTO(long id, BigDecimal amount, LocalDate transactionDate, String comment) {
+    public IncomeDTO(long id, BigDecimal amount, LocalDate transactionDate, String comment, String categoryName) {
         this.id = id;
         this.amount = amount;
         this.transactionDate = transactionDate;
         this.comment = comment;
+        this.categoryName = categoryName;
     }
 
     // Геттеры
@@ -35,10 +36,15 @@ public class IncomeDTO {
         return comment;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
     @Override
     public String toString() {
         return "IncomeDTO{" +
                 "id=" + id +
+                ", categoryName='" + categoryName + '\'' +
                 ", amount=" + amount +
                 ", transactionDate=" + transactionDate +
                 ", comment='" + comment + '\'' +
