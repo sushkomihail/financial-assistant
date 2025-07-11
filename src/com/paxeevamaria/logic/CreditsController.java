@@ -1,124 +1,124 @@
 package com.paxeevamaria.logic;
 
+import com.kolesnikovroman.CreditOfferInitializerService;
+import com.kolesnikovroman.CreditOfferRepository;
+import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.LoanOfferDTO;
 import com.sushkomihail.llmagent.LlmAgentController;
-import com.sushkomihail.llmagent.requests.LoanOfferRequest;
-import com.sushkomihail.llmagent.requests.MimeType;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
 
 public class CreditsController {
-    @FXML
-    private ComboBox<String> bankComboBox;
-    @FXML
-    private VBox offersContainer;
+
+    @FXML private TableView<LoanOfferDTO> creditsTable;
+    @FXML private TableColumn<LoanOfferDTO, String> bankColumn;
+    @FXML private TableColumn<LoanOfferDTO, String> productColumn;
+    @FXML private TableColumn<LoanOfferDTO, String> amountColumn;
+    @FXML private TableColumn<LoanOfferDTO, String> rateColumn;
+    @FXML private TableColumn<LoanOfferDTO, String> termColumn;
+    @FXML private TableColumn<LoanOfferDTO, String> totalCostColumn;
+
+    @FXML private VBox recommendationBox;
+    @FXML private TextArea recommendationText;
 
     private LlmAgentController llmAgentController;
+    private CreditOfferRepository creditOfferRepository;
+    private ObservableList<LoanOfferDTO> offersData = FXCollections.observableArrayList();
 
     public void initialize(LlmAgentController llmAgentController) {
         this.llmAgentController = llmAgentController;
+        this.creditOfferRepository = new CreditOfferRepository();
+        CreditOfferInitializerService initializerService = new CreditOfferInitializerService(
+                creditOfferRepository, llmAgentController);
+        initializerService.run();
 
-        // Инициализация выпадающего списка банков
-        ObservableList<String> banks = FXCollections.observableArrayList(
-                "Все банки",
-                "Сбербанк",
-                "ВТБ",
-                "Альфа-Банк"
-        );
-        bankComboBox.setItems(banks);
-        bankComboBox.getSelectionModel().selectFirst();
+        // Настройка колонок таблицы
+        bankColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().bankName()));
+        productColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().productName()));
+        amountColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().amount()));
+        rateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().rate()));
+        termColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().term()));
+        totalCostColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().fullLoanCost()));
 
-        // Загрузка предложений по умолчанию (все банки)
-        loadOffers(null);
+        loadCreditOffers();
+    }
+
+    private void loadCreditOffers() {
+        Task<List<LoanOfferDTO>> loadTask = new Task<>() {
+            @Override
+            protected List<LoanOfferDTO> call() throws Exception {
+                return creditOfferRepository.findAll();
+            }
+        };
+
+        loadTask.setOnSucceeded(e -> {
+            offersData.setAll(loadTask.getValue());
+            creditsTable.setItems(offersData);
+        });
+
+        loadTask.setOnFailed(e -> {
+            showAlert("Ошибка", "Не удалось загрузить кредитные предложения",
+                    loadTask.getException().getMessage());
+        });
+
+        new Thread(loadTask).start();
     }
 
     @FXML
     private void handleRefresh() {
-        String selectedBank = bankComboBox.getSelectionModel().getSelectedItem();
-        String bankFileName = null;
-
-        if ("Сбербанк".equals(selectedBank)) {
-            bankFileName = "sber.pdf";
-        } else if ("ВТБ".equals(selectedBank)) {
-            bankFileName = "vtb.pdf";
-        } else if ("Альфа-Банк".equals(selectedBank)) {
-            bankFileName = "alfa.pdf";
-        }
-
-        loadOffers(bankFileName);
+        loadCreditOffers();
+        recommendationBox.setVisible(false);
     }
 
-    private void loadOffers(String bankFileName) {
-        offersContainer.getChildren().clear();
+    @FXML
+    private void handleGetRecommendation() {
+        if (creditsTable.getSelectionModel().isEmpty()) {
+            showAlert("Ошибка", "Не выбрано предложение",
+                    "Пожалуйста, выберите кредитное предложение из таблицы");
+            return;
+        }
 
-        try {
-            List<LoanOfferDTO> allOffers = new ArrayList<>();
+        LoanOfferDTO selected = creditsTable.getSelectionModel().getSelectedItem();
+        String prompt = String.format(
+                "Проанализируй кредитное предложение: банк '%s', продукт '%s', сумма %s, ставка %s, срок %s, общая стоимость %s. " +
+                        "Дай краткую оценку этому предложению (1-2 предложения) и рекомендацию - стоит ли брать этот кредит.",
+                selected.bankName(), selected.productName(), selected.amount(),
+                selected.rate(), selected.term(), selected.fullLoanCost());
 
-            if (bankFileName == null) {
-                // Загрузка предложений из всех банков
-                allOffers.addAll(loadBankOffers("sber.pdf"));
-                allOffers.addAll(loadBankOffers("vtb.pdf"));
-                allOffers.addAll(loadBankOffers("alfa.pdf"));
-            } else {
-                // Загрузка предложений только выбранного банка
-                allOffers.addAll(loadBankOffers(bankFileName));
+        Task<String> recommendationTask = new Task<>() {
+            @Override
+            protected String call() throws Exception {
+                return llmAgentController.getResponse(prompt);
             }
+        };
 
-            if (allOffers.isEmpty()) {
-                Label noOffersLabel = new Label("Нет доступных кредитных предложений");
-                offersContainer.getChildren().add(noOffersLabel);
-            } else {
-                for (LoanOfferDTO offer : allOffers) {
-                    addOfferToContainer(offer);
-                }
-            }
-        } catch (Exception e) {
-            Label errorLabel = new Label("Ошибка при загрузке кредитных предложений: " + e.getMessage());
-            offersContainer.getChildren().add(errorLabel);
-        }
+        recommendationTask.setOnSucceeded(e -> {
+            recommendationText.setText(recommendationTask.getValue());
+            recommendationBox.setVisible(true);
+        });
+
+        recommendationTask.setOnFailed(e -> {
+            showAlert("Ошибка", "Не удалось получить рекомендацию",
+                    recommendationTask.getException().getMessage());
+        });
+
+        new Thread(recommendationTask).start();
     }
 
-    private List<LoanOfferDTO> loadBankOffers(String bankFileName) {
-        try {
-            LoanOfferRequest request = new LoanOfferRequest(MimeType.PDF, bankFileName);
-            return llmAgentController.getLoanOffers(null, request);
-        } catch (Exception e) {
-            System.err.println("Ошибка при загрузке предложений из файла " + bankFileName + ": " + e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    private void addOfferToContainer(LoanOfferDTO offer) {
-        VBox offerBox = new VBox(5);
-        offerBox.setStyle("-fx-padding: 10; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-background-radius: 5;");
-
-        Label bankLabel = new Label("Банк: " + offer.bankName());
-        bankLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-
-        Label productLabel = new Label("Продукт: " + offer.productName());
-        Label amountLabel = new Label("Сумма: " + offer.amount());
-        Label rateLabel = new Label("Ставка: " + offer.rate());
-        Label termLabel = new Label("Срок: " + offer.term());
-        Label costLabel = new Label("Полная стоимость кредита: " + offer.fullLoanCost());
-
-        offerBox.getChildren().addAll(
-                bankLabel,
-                productLabel,
-                amountLabel,
-                rateLabel,
-                termLabel,
-                costLabel
-        );
-
-        offersContainer.getChildren().add(offerBox);
+    private void showAlert(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

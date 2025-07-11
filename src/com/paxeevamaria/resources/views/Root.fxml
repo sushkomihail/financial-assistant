@@ -20,9 +20,7 @@
                 <MenuItem text="Расходы" onAction="#showExpense"/>
             </Menu>
             <Menu text="Аналитика">
-<!--                <MenuItem text="Статистика" onAction="#showAnalytics"/>-->
                 <MenuItem text="Кредиты" onAction="#showCredit"/>
-                <MenuItem text="Накопления" onAction="#showSavings"/>
             </Menu>
         </MenuBar>
 
@@ -50,11 +48,6 @@
                 </padding>
             </Button>
             <Button text="Кредиты" onAction="#showCredit" styleClass="nav-button">
-                <padding>
-                    <Insets top="5" right="10" bottom="5" left="10"/>
-                </padding>
-            </Button>
-            <Button text="Накопления" onAction="#showSavings" styleClass="nav-button">
                 <padding>
                     <Insets top="5" right="10" bottom="5" left="10"/>
                 </padding>

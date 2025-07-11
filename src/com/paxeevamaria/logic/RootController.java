@@ -35,9 +35,4 @@ public class RootController {
     private void showCredit() {
         mainApp.showCredits();
     }
-
-    @FXML
-    private void showSavings() {
-        mainApp.showSavings();
-    }
 }

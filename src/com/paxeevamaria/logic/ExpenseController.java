@@ -6,14 +6,17 @@ import com.kolesnikovroman.FinancialRepository;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ExpenseController {
@@ -27,13 +30,10 @@ public class ExpenseController {
     @FXML private TableColumn<ExpenseDTO, String> categoryColumn;
     @FXML private TableColumn<ExpenseDTO, BigDecimal> amountColumn;
     @FXML private TableColumn<ExpenseDTO, String> commentColumn;
-    @FXML private Pagination pagination;
-    @FXML private ComboBox<Integer> itemsPerPageComboBox;
 
     private FinancialRepository financialRepository;
     private ObservableList<ExpenseDTO> allExpenses = FXCollections.observableArrayList();
     private ObservableList<String> allCategories = FXCollections.observableArrayList();
-    private int itemsPerPage = 10;
 
     @FXML
     public void initialize() {
@@ -58,74 +58,199 @@ public class ExpenseController {
             }
         });
 
-        // Управление страницами
-        itemsPerPageComboBox.getItems().addAll(5, 10, 20, 50);
-        itemsPerPageComboBox.setValue(itemsPerPage);
-        itemsPerPageComboBox.setOnAction(e -> {
-            itemsPerPage = itemsPerPageComboBox.getValue();
-            updatePagination();
-        });
+        // Установка соотношения ширины столбцов 2:3:2:5
+        dateColumn.prefWidthProperty().bind(expensesTable.widthProperty().multiply(2.0 / 12.0));
+        categoryColumn.prefWidthProperty().bind(expensesTable.widthProperty().multiply(3.0 / 12.0));
+        amountColumn.prefWidthProperty().bind(expensesTable.widthProperty().multiply(2.0 / 12.0));
+        commentColumn.prefWidthProperty().bind(expensesTable.widthProperty().multiply(5.0 / 12.0));
 
+        // Растягивание таблицы по высоте
+        expensesTable.prefHeightProperty().bind(
+                ((Region) expensesTable.getParent()).heightProperty()
+        );
         loadCategories();
         loadExpenses();
     }
 
     private void loadCategories() {
         try {
-            List<CategorySummaryDTO> categories = financialRepository.getLastMonthSummary();
+            List<String> categories = financialRepository.findAllExpenseCategories();
             allCategories.clear();
             allCategories.add("Все категории");
-            allCategories.addAll(categories.stream()
-                    .map(CategorySummaryDTO::getCategoryName)
-                    .collect(Collectors.toList()));
+            allCategories.addAll(categories);
 
             categoryComboBox.setItems(allCategories);
             categoryComboBox.getSelectionModel().selectFirst();
         } catch (SQLException e) {
-            showError("Ошибка загрузки категорий", e.getMessage());
+            showError("Ошибка загрузки категорий доходов", e.getMessage());
         }
     }
 
     private void loadExpenses() {
         try {
-            //List<ExpenseDTO> expenses = financialRepository.getAllExpenses();
-            List<ExpenseDTO> expenses = Arrays.asList(
-                    new ExpenseDTO(1L,
-                            new BigDecimal("1500.50"),
-                            LocalDate.of(2023, 5, 10),
-                            "Продукты в Пятерочке"),
-
-                    new ExpenseDTO(2L,
-                            new BigDecimal("3200.00"),
-                            LocalDate.of(2023, 5, 15),
-                            "Оплата аренды квартиры"),
-
-                    new ExpenseDTO(3L,
-                            new BigDecimal("750.30"),
-                            LocalDate.of(2023, 5, 18),
-                            "Бензин на АЗС Лукойл"),
-
-                    new ExpenseDTO(4L,
-                            new BigDecimal("1200.00"),
-                            LocalDate.of(2023, 6, 2),
-                            "Обед в ресторане"),
-
-                    new ExpenseDTO(5L,
-                            new BigDecimal("4500.00"),
-                            LocalDate.of(2023, 6, 5),
-                            "Новые кроссовки")
-            );
+            List<ExpenseDTO> expenses = financialRepository.findAllExpenses();
             allExpenses.setAll(expenses);
-
-            updateTable();
+            expensesTable.setItems(allExpenses);
             updateSummary();
-            updatePagination();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             showError("Ошибка загрузки расходов", e.getMessage());
         }
-//        } catch (SQLException e) {
-//            showError("Ошибка загрузки расходов", e.getMessage());
-//        }
+    }
+
+    @FXML
+    private void handleAddExpense() {
+        try {
+            // Диалог для добавления нового расхода
+            Dialog<ExpenseDTO> dialog = new Dialog<>();
+            dialog.setTitle("Добавить новый расход");
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+            // Создание формы
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            DatePicker datePicker = new DatePicker(LocalDate.now());
+            ComboBox<String> categoryCombo = new ComboBox<>(allCategories.filtered(c -> !c.equals("Все категории")));
+            TextField amountField = new TextField();
+            TextArea commentArea = new TextArea();
+
+            grid.add(new Label("Дата:"), 0, 0);
+            grid.add(datePicker, 1, 0);
+            grid.add(new Label("Категория:"), 0, 1);
+            grid.add(categoryCombo, 1, 1);
+            grid.add(new Label("Сумма:"), 0, 2);
+            grid.add(amountField, 1, 2);
+            grid.add(new Label("Комментарий:"), 0, 3);
+            grid.add(commentArea, 1, 3);
+
+            dialog.getDialogPane().setContent(grid);
+
+            // Преобразование результата в ExpenseDTO
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == ButtonType.OK) {
+                    try {
+                        BigDecimal amount = new BigDecimal(amountField.getText());
+                        return new ExpenseDTO(0, amount, datePicker.getValue(),
+                                commentArea.getText(), categoryCombo.getValue());
+                    } catch (NumberFormatException e) {
+                        showError("Ошибка", "Некорректная сумма");
+                        return null;
+                    }
+                }
+                return null;
+            });
+
+            Optional<ExpenseDTO> result = dialog.showAndWait();
+            result.ifPresent(expense -> {
+                try {
+                    ExpenseDTO newExpense = financialRepository.addExpense(expense);
+                    allExpenses.add(newExpense);
+                    updateSummary();
+                } catch (SQLException e) {
+                    showError("Ошибка добавления", e.getMessage());
+                }
+            });
+
+        } catch (Exception e) {
+            showError("Ошибка", "Не удалось создать диалог добавления");
+        }
+    }
+
+    @FXML
+    private void handleEditExpense() {
+        ExpenseDTO selected = expensesTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showError("Ошибка", "Выберите расход для редактирования");
+            return;
+        }
+
+        try {
+            Dialog<ExpenseDTO> dialog = new Dialog<>();
+            dialog.setTitle("Редактировать расход");
+
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            DatePicker datePicker = new DatePicker(selected.getTransactionDate());
+            ComboBox<String> categoryCombo = new ComboBox<>(allCategories.filtered(c -> !c.equals("Все категории")));
+            categoryCombo.setValue(selected.getCategoryName());
+            TextField amountField = new TextField(selected.getAmount().toString());
+            TextArea commentArea = new TextArea(selected.getComment());
+
+            grid.add(new Label("Дата:"), 0, 0);
+            grid.add(datePicker, 1, 0);
+            grid.add(new Label("Категория:"), 0, 1);
+            grid.add(categoryCombo, 1, 1);
+            grid.add(new Label("Сумма:"), 0, 2);
+            grid.add(amountField, 1, 2);
+            grid.add(new Label("Комментарий:"), 0, 3);
+            grid.add(commentArea, 1, 3);
+
+            dialog.getDialogPane().setContent(grid);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == ButtonType.OK) {
+                    try {
+                        BigDecimal amount = new BigDecimal(amountField.getText());
+                        return new ExpenseDTO(selected.getId(), amount, datePicker.getValue(),
+                                commentArea.getText(), categoryCombo.getValue());
+                    } catch (NumberFormatException e) {
+                        showError("Ошибка", "Некорректная сумма");
+                        return null;
+                    }
+                }
+                return null;
+            });
+
+            Optional<ExpenseDTO> result = dialog.showAndWait();
+            result.ifPresent(expense -> {
+                try {
+                    financialRepository.updateExpense(expense);
+                    int index = allExpenses.indexOf(selected);
+                    allExpenses.set(index, expense);
+                    updateSummary();
+                } catch (SQLException e) {
+                    showError("Ошибка обновления", e.getMessage());
+                }
+            });
+
+        } catch (Exception e) {
+            showError("Ошибка", "Не удалось создать диалог редактирования");
+        }
+    }
+
+    @FXML
+    private void handleDeleteExpense() {
+        ExpenseDTO selected = expensesTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showError("Ошибка", "Выберите расход для удаления");
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Подтверждение удаления");
+        alert.setHeaderText("Вы действительно хотите удалить выбранный расход?");
+        alert.setContentText(String.format("Дата: %s\nКатегория: %s\nСумма: %,.2f ₽",
+                selected.getTransactionDate(),
+                selected.getCategoryName(),
+                selected.getAmount()));
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                financialRepository.deleteExpense(selected.getId());
+                allExpenses.remove(selected);
+                updateSummary();
+            } catch (SQLException e) {
+                showError("Ошибка удаления", e.getMessage());
+            }
+        }
     }
 
     @FXML
@@ -136,10 +261,10 @@ public class ExpenseController {
 
         ObservableList<ExpenseDTO> filtered = allExpenses.filtered(expense -> {
             // Фильтр по категории
-//            if (selectedCategory != null && !selectedCategory.equals("Все категории")
-//                    && !expense.getCategoryName().equals(selectedCategory)) {
-//                return false;
-//            }
+            if (selectedCategory != null && !selectedCategory.equals("Все категории")
+                    && !expense.getCategoryName().equals(selectedCategory)) {
+                return false;
+            }
 
             // Фильтр по дате
             if (startDate != null && expense.getTransactionDate().isBefore(startDate)) {
@@ -163,27 +288,6 @@ public class ExpenseController {
         endDatePicker.setValue(null);
         expensesTable.setItems(allExpenses);
         updateSummary();
-    }
-
-    private void updateTable() {
-        int totalItems = allExpenses.size();
-        int pageCount = (int) Math.ceil((double) totalItems / itemsPerPage);
-
-        pagination.setPageCount(pageCount);
-        pagination.setCurrentPageIndex(0);
-        pagination.setPageFactory(pageIndex -> {
-            int fromIndex = pageIndex * itemsPerPage;
-            int toIndex = Math.min(fromIndex + itemsPerPage, totalItems);
-            expensesTable.setItems(FXCollections.observableArrayList(
-                    allExpenses.subList(fromIndex, toIndex)));
-            return expensesTable;
-        });
-    }
-
-    private void updatePagination() {
-        int totalItems = expensesTable.getItems().size();
-        int pageCount = (int) Math.ceil((double) totalItems / itemsPerPage);
-        pagination.setPageCount(pageCount > 0 ? pageCount : 1);
     }
 
     private void updateSummary() {

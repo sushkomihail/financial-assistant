@@ -52,3 +52,46 @@
 .scroll-pane .viewport {
     -fx-background-color: transparent;
 }
+
+/* Стили для таблицы */
+.income-table, .expense-table {
+    -fx-font-size: 14px;
+    -fx-padding: 10px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+}
+
+.table-view .column-header {
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.table-view .table-row-cell {
+    -fx-cell-size: 40px;
+}
+
+.table-view .table-row-cell:odd {
+    -fx-background-color: #f9f9f9;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #E3F2FD;
+    -fx-text-background-color: #1976D2;
+}
+
+/* Стили для сводной информации */
+.summary-box {
+    -fx-background-color: #E3F2FD;
+    -fx-border-color: #BBDEFB;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-padding: 10px;
+}
+
+/* Эффекты при наведении */
+.button:hover, .combo-box:hover, .date-picker:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 1);
+}

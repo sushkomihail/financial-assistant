@@ -2,8 +2,6 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.Insets?>
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
@@ -21,8 +19,15 @@
             <Label text="-"/>
             <DatePicker fx:id="endDatePicker" promptText="По дату"/>
 
-            <Button text="Применить" onAction="#handleApplyFilters" styleClass="apply-button"/>
-            <Button text="Сбросить" onAction="#handleResetFilters" styleClass="reset-button"/>
+            <Button text="Применить" onAction="#handleApplyFilters" />
+            <Button text="Сбросить" onAction="#handleResetFilters"/>
+        </HBox>
+
+        <!-- Кнопки управления -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button text="Добавить" onAction="#handleAddIncome" styleClass="add-button"/>
+            <Button text="Изменить" onAction="#handleEditIncome" styleClass="edit-button"/>
+            <Button text="Удалить" onAction="#handleDeleteIncome" styleClass="delete-button"/>
         </HBox>
 
         <!-- Сводная информация -->
@@ -47,16 +52,8 @@
                 <TableColumn text="Дата" prefWidth="100" fx:id="dateColumn"/>
                 <TableColumn text="Категория" prefWidth="150" fx:id="categoryColumn"/>
                 <TableColumn text="Сумма" prefWidth="120" fx:id="amountColumn"/>
-                <TableColumn text="Источник" prefWidth="200" fx:id="sourceColumn"/>
                 <TableColumn text="Комментарий" prefWidth="250" fx:id="commentColumn"/>
             </columns>
         </TableView>
-
-        <!-- Управление страницами -->
-        <HBox spacing="10" alignment="CENTER_RIGHT">
-            <Label text="Записей на странице:"/>
-            <ComboBox fx:id="itemsPerPageComboBox" value="10"/>
-            <Pagination fx:id="pagination" pageCount="1"/>
-        </HBox>
     </VBox>
 </AnchorPane>

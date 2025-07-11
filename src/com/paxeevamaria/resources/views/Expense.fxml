@@ -2,58 +2,55 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.Insets?>
 
-<?import java.net.URL?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             stylesheets="@../styles/style.css"
             fx:controller="com.paxeevamaria.logic.ExpenseController">
 
-<VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10">
-    <!-- Строка фильтров -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Фильтры:" styleClass="filter-label"/>
+    <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10">
+        <!-- Строка фильтров -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Фильтры:" styleClass="filter-label"/>
 
-        <ComboBox fx:id="categoryComboBox" promptText="Все категории" prefWidth="200"/>
+            <ComboBox fx:id="categoryComboBox" promptText="Все категории" prefWidth="200"/>
 
-        <DatePicker fx:id="startDatePicker" promptText="С даты"/>
-        <Label text="-"/>
-        <DatePicker fx:id="endDatePicker" promptText="По дату"/>
+            <DatePicker fx:id="startDatePicker" promptText="С даты"/>
+            <Label text="-"/>
+            <DatePicker fx:id="endDatePicker" promptText="По дату"/>
 
-        <Button text="Применить" onAction="#handleApplyFilters" styleClass="apply-button"/>
-        <Button text="Сбросить" onAction="#handleResetFilters" styleClass="reset-button"/>
-    </HBox>
+            <Button text="Применить" onAction="#handleApplyFilters"/>
+            <Button text="Сбросить" onAction="#handleResetFilters"/>
+        </HBox>
 
-    <!-- Сводная информация -->
-    <HBox spacing="20" styleClass="summary-box">
-        <VBox styleClass="summary-item">
-            <Label text="Всего расходов:" styleClass="summary-label"/>
-            <Label fx:id="totalAmountLabel" text="0.00 ₽" styleClass="summary-value"/>
-        </VBox>
-        <VBox styleClass="summary-item">
-            <Label text="Количество записей:" styleClass="summary-label"/>
-            <Label fx:id="recordsCountLabel" text="0" styleClass="summary-value"/>
-        </VBox>
-    </HBox>
+        <!-- Кнопки управления -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button text="Добавить" onAction="#handleAddExpense" styleClass="add-button"/>
+            <Button text="Изменить" onAction="#handleEditExpense" styleClass="edit-button"/>
+            <Button text="Удалить" onAction="#handleDeleteExpense" styleClass="delete-button"/>
+        </HBox>
 
-    <!-- Таблица расходов -->
-    <TableView fx:id="expensesTable" styleClass="expense-table">
-        <columns>
-            <TableColumn text="Дата" prefWidth="100" fx:id="dateColumn"/>
-            <TableColumn text="Категория" prefWidth="150" fx:id="categoryColumn"/>
-            <TableColumn text="Сумма" prefWidth="120" fx:id="amountColumn"/>
-            <TableColumn text="Комментарий" prefWidth="300" fx:id="commentColumn"/>
-        </columns>
-    </TableView>
+        <!-- Сводная информация -->
+        <HBox spacing="20" styleClass="summary-box">
+            <VBox styleClass="summary-item">
+                <Label text="Всего расходов:" styleClass="summary-label"/>
+                <Label fx:id="totalAmountLabel" text="0.00 ₽" styleClass="summary-value"/>
+            </VBox>
+            <VBox styleClass="summary-item">
+                <Label text="Количество записей:" styleClass="summary-label"/>
+                <Label fx:id="recordsCountLabel" text="0" styleClass="summary-value"/>
+            </VBox>
+        </HBox>
 
-    <!-- Управление страницами -->
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Label text="Записей на странице:"/>
-        <ComboBox fx:id="itemsPerPageComboBox" value="10"/>
-        <Pagination fx:id="pagination" pageCount="1"/>
-    </HBox>
-</VBox>
+        <!-- Таблица расходов -->
+        <TableView fx:id="expensesTable" styleClass="expense-table">
+            <columns>
+                <TableColumn text="Дата" prefWidth="100" fx:id="dateColumn"/>
+                <TableColumn text="Категория" prefWidth="150" fx:id="categoryColumn"/>
+                <TableColumn text="Сумма" prefWidth="120" fx:id="amountColumn"/>
+                <TableColumn text="Комментарий" prefWidth="300" fx:id="commentColumn"/>
+            </columns>
+        </TableView>
+    </VBox>
 
 </AnchorPane>

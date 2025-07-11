@@ -10,13 +10,15 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class IncomeController {
@@ -31,13 +33,10 @@ public class IncomeController {
     @FXML private TableColumn<IncomeDTO, String> categoryColumn;
     @FXML private TableColumn<IncomeDTO, BigDecimal> amountColumn;
     @FXML private TableColumn<IncomeDTO, String> commentColumn;
-    @FXML private Pagination pagination;
-    @FXML private ComboBox<Integer> itemsPerPageComboBox;
 
     private FinancialRepository financialRepository;
     private ObservableList<IncomeDTO> allIncomes = FXCollections.observableArrayList();
     private ObservableList<String> allCategories = FXCollections.observableArrayList();
-    private int itemsPerPage = 10;
 
     @FXML
     public void initialize() {
@@ -45,10 +44,7 @@ public class IncomeController {
 
         // Инициализация столбцов
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
-        categoryColumn.setCellValueFactory(cellData -> {
-            // В текущей реализации IncomeDTO нет поля categoryName, поэтому используем заглушку
-            return new SimpleStringProperty("Категория");
-        });
+        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         commentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
 
@@ -65,26 +61,26 @@ public class IncomeController {
             }
         });
 
-        // Управление страницами
-        itemsPerPageComboBox.getItems().addAll(5, 10, 20, 50);
-        itemsPerPageComboBox.setValue(itemsPerPage);
-        itemsPerPageComboBox.setOnAction(e -> {
-            itemsPerPage = itemsPerPageComboBox.getValue();
-            updatePagination();
-        });
+        // Установка соотношения ширины столбцов 2:3:2:5
+        dateColumn.prefWidthProperty().bind(incomesTable.widthProperty().multiply(2.0 / 12.0));
+        categoryColumn.prefWidthProperty().bind(incomesTable.widthProperty().multiply(3.0 / 12.0));
+        amountColumn.prefWidthProperty().bind(incomesTable.widthProperty().multiply(2.0 / 12.0));
+        commentColumn.prefWidthProperty().bind(incomesTable.widthProperty().multiply(5.0 / 12.0));
 
+        // Растягивание таблицы по высоте
+        incomesTable.prefHeightProperty().bind(
+                ((Region) incomesTable.getParent()).heightProperty()
+        );
         loadCategories();
         loadIncomes();
     }
 
     private void loadCategories() {
         try {
-            List<CategorySummaryDTO> categories = financialRepository.getCurrentMonthIncomeSummary();
+            List<String> categories = financialRepository.findAllIncomeCategories();
             allCategories.clear();
             allCategories.add("Все категории");
-            allCategories.addAll(categories.stream()
-                    .map(CategorySummaryDTO::getCategoryName)
-                    .collect(Collectors.toList()));
+            allCategories.addAll(categories);
 
             categoryComboBox.setItems(allCategories);
             categoryComboBox.getSelectionModel().selectFirst();
@@ -95,43 +91,156 @@ public class IncomeController {
 
     private void loadIncomes() {
         try {
-            //List<IncomeDTO> incomes = financialRepository.getAllIncomes();
-            List<IncomeDTO> incomes = Arrays.asList(
-                    new IncomeDTO(1L,
-                            new BigDecimal("1500.50"),
-                            LocalDate.of(2023, 5, 10),
-                            "Продукты в Пятерочке"),
-
-                    new IncomeDTO(2L,
-                            new BigDecimal("3200.00"),
-                            LocalDate.of(2023, 5, 15),
-                            "Оплата аренды квартиры"),
-
-                    new IncomeDTO(3L,
-                            new BigDecimal("750.30"),
-                            LocalDate.of(2023, 5, 18),
-                            "Бензин на АЗС Лукойл"),
-
-                    new IncomeDTO(4L,
-                            new BigDecimal("1200.00"),
-                            LocalDate.of(2023, 6, 2),
-                            "Обед в ресторане"),
-
-                    new IncomeDTO(5L,
-                            new BigDecimal("4500.00"),
-                            LocalDate.of(2023, 6, 5),
-                            "Новые кроссовки")
-            );
+            List<IncomeDTO> incomes = financialRepository.findAllIncomes();
             allIncomes.setAll(incomes);
-
-            updateTable();
+            incomesTable.setItems(allIncomes);
             updateSummary();
-            updatePagination();
-//        } catch (SQLException e) {
-//            showError("Ошибка загрузки доходов", e.getMessage());
-//        }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             showError("Ошибка загрузки доходов", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleAddIncome() {
+        Dialog<IncomeDTO> dialog = new Dialog<>();
+        dialog.setTitle("Добавить новый доход");
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+
+        DatePicker datePicker = new DatePicker(LocalDate.now());
+        ComboBox<String> categoryCombo = new ComboBox<>(allCategories.filtered(c -> !c.equals("Все категории")));
+        TextField amountField = new TextField();
+        TextArea commentArea = new TextArea();
+
+        grid.add(new Label("Дата:"), 0, 0);
+        grid.add(datePicker, 1, 0);
+        grid.add(new Label("Категория:"), 0, 1);
+        grid.add(categoryCombo, 1, 1);
+        grid.add(new Label("Сумма:"), 0, 2);
+        grid.add(amountField, 1, 2);
+        grid.add(new Label("Комментарий:"), 0, 3);
+        grid.add(commentArea, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                try {
+                    BigDecimal amount = new BigDecimal(amountField.getText());
+                    return new IncomeDTO(0, amount, datePicker.getValue(),
+                            commentArea.getText(), categoryCombo.getValue());
+                } catch (NumberFormatException e) {
+                    showError("Ошибка", "Некорректная сумма");
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        Optional<IncomeDTO> result = dialog.showAndWait();
+        result.ifPresent(income -> {
+            try {
+                IncomeDTO newIncome = financialRepository.addIncome(income);
+                allIncomes.add(newIncome);
+                updateSummary();
+            } catch (SQLException e) {
+                showError("Ошибка добавления", e.getMessage());
+            }
+        });
+    }
+
+    @FXML
+    private void handleEditIncome() {
+        IncomeDTO selected = incomesTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showError("Ошибка", "Выберите доход для редактирования");
+            return;
+        }
+
+        Dialog<IncomeDTO> dialog = new Dialog<>();
+        dialog.setTitle("Редактировать доход");
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+
+        DatePicker datePicker = new DatePicker(selected.getTransactionDate());
+        ComboBox<String> categoryCombo = new ComboBox<>(allCategories.filtered(c -> !c.equals("Все категории")));
+        categoryCombo.setValue(selected.getCategoryName());
+        TextField amountField = new TextField(selected.getAmount().toString());
+        TextArea commentArea = new TextArea(selected.getComment());
+
+        grid.add(new Label("Дата:"), 0, 0);
+        grid.add(datePicker, 1, 0);
+        grid.add(new Label("Категория:"), 0, 1);
+        grid.add(categoryCombo, 1, 1);
+        grid.add(new Label("Сумма:"), 0, 2);
+        grid.add(amountField, 1, 2);
+        grid.add(new Label("Комментарий:"), 0, 3);
+        grid.add(commentArea, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                try {
+                    BigDecimal amount = new BigDecimal(amountField.getText());
+                    return new IncomeDTO(selected.getId(), amount, datePicker.getValue(),
+                            commentArea.getText(), categoryCombo.getValue());
+                } catch (NumberFormatException e) {
+                    showError("Ошибка", "Некорректная сумма");
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        Optional<IncomeDTO> result = dialog.showAndWait();
+        result.ifPresent(income -> {
+            try {
+                financialRepository.updateIncome(income);
+                int index = allIncomes.indexOf(selected);
+                allIncomes.set(index, income);
+                updateSummary();
+            } catch (SQLException e) {
+                showError("Ошибка обновления", e.getMessage());
+            }
+        });
+    }
+
+    @FXML
+    private void handleDeleteIncome() {
+        IncomeDTO selected = incomesTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showError("Ошибка", "Выберите доход для удаления");
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Подтверждение удаления");
+        alert.setHeaderText("Вы действительно хотите удалить выбранный доход?");
+        alert.setContentText(String.format("Дата: %s\nКатегория: %s\nСумма: %,.2f ₽",
+                selected.getTransactionDate(),
+                selected.getCategoryName(),
+                selected.getAmount()));
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                financialRepository.deleteIncome(selected.getId());
+                allIncomes.remove(selected);
+                updateSummary();
+            } catch (SQLException e) {
+                showError("Ошибка удаления", e.getMessage());
+            }
         }
     }
 
@@ -142,12 +251,11 @@ public class IncomeController {
         LocalDate endDate = endDatePicker.getValue();
 
         ObservableList<IncomeDTO> filtered = allIncomes.filtered(income -> {
-            // Фильтр по категории временно отключен, т.к. IncomeDTO не содержит categoryName
-            // if (selectedCategory != null && !selectedCategory.equals("Все категории")) {
-            //     return false;
-            // }
+            if (selectedCategory != null && !selectedCategory.equals("Все категории")
+                    && !income.getCategoryName().equals(selectedCategory)) {
+                return false;
+            }
 
-            // Фильтр по дате
             if (startDate != null && income.getTransactionDate().isBefore(startDate)) {
                 return false;
             }
@@ -169,27 +277,6 @@ public class IncomeController {
         endDatePicker.setValue(null);
         incomesTable.setItems(allIncomes);
         updateSummary();
-    }
-
-    private void updateTable() {
-        int totalItems = allIncomes.size();
-        int pageCount = (int) Math.ceil((double) totalItems / itemsPerPage);
-
-        pagination.setPageCount(pageCount);
-        pagination.setCurrentPageIndex(0);
-        pagination.setPageFactory(pageIndex -> {
-            int fromIndex = pageIndex * itemsPerPage;
-            int toIndex = Math.min(fromIndex + itemsPerPage, totalItems);
-            incomesTable.setItems(FXCollections.observableArrayList(
-                    allIncomes.subList(fromIndex, toIndex)));
-            return incomesTable;
-        });
-    }
-
-    private void updatePagination() {
-        int totalItems = incomesTable.getItems().size();
-        int pageCount = (int) Math.ceil((double) totalItems / itemsPerPage);
-        pagination.setPageCount(pageCount > 0 ? pageCount : 1);
     }
 
     private void updateSummary() {

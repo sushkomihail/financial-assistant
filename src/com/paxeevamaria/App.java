@@ -59,15 +59,6 @@ public class App extends Application {
             rootLayout.setCenter(dashboard);
             MainUIController controller = loader.getController();
 
-//          --------------- GIGA CHAT -----------------
-//            Properties props = new Properties();
-//            FileInputStream configFile = new FileInputStream("gigachatapi.properties");
-//            props.load(configFile);
-//            String authKey = props.getProperty("auth_key");
-//
-//            GigaChatAgent gigaChatAgent = new GigaChatAgent(authKey);
-//            LlmAgentController llmAgentController = new LlmAgentController(gigaChatAgent);
-
             initGigaChat();
             controller.setMainPanel(llmAgentController);
         } catch (IOException e) {
@@ -133,12 +124,8 @@ public class App extends Application {
 
         } catch (IOException e) {
             e.printStackTrace();
-//            showAlert("Ошибка", "Не удалось загрузить кредитные предложения", e.getMessage());
         }
     }
-   // public void showCredits() {}
-
-    public void showSavings() {}
 
     private void initGigaChat() throws IOException {
         Properties props = new Properties();
