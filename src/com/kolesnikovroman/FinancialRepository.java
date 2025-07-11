@@ -6,22 +6,274 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Репозиторий для управления финансовыми данными в базе данных.
+ * Предоставляет полный набор CRUD-операций и методов для получения сводных отчетов.
+ */
 public class FinancialRepository {
 
     private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/FinanceDataBase";
     private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "12345"; // Пароль лучше хранить в конфигурации
+    private static final String PASSWORD = "12345";
 
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD);
     }
 
-
+    // =========================================================================
+    // ==== CRUD Operations for Expenses ====
+    // =========================================================================
 
     /**
-     * Вызывает функцию get_last_month_summary_by_category и возвращает список DTO.
+     * Добавляет новую запись о расходе в базу данных.
+     * Автоматически находит ID категории по ее имени.
+     *
+     * @param expense DTO с данными нового расхода. Поле ID игнорируется.
+     * @return Полностью сформированный DTO, включая сгенерированный базой данных ID.
+     * @throws SQLException если происходит ошибка доступа к БД.
+     * @throws IllegalArgumentException если указанная категория не найдена.
      */
+    public ExpenseDTO addExpense(ExpenseDTO expense) throws SQLException {
+        final String sql = "INSERT INTO expenses (amount, transaction_date, comment, category_id) VALUES (?, ?, ?, ?) RETURNING id, transaction_date;";
+
+        try (Connection connection = getConnection()) {
+            long categoryId = getCategoryIdByName(connection, "expense_categories", expense.getCategoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория расходов '" + expense.getCategoryName() + "' не найдена."));
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setBigDecimal(1, expense.getAmount());
+                statement.setDate(2, Date.valueOf(expense.getTransactionDate()));
+                statement.setString(3, expense.getComment());
+                statement.setLong(4, categoryId);
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        long newId = rs.getLong("id");
+                        LocalDate newDate = rs.getDate("transaction_date").toLocalDate();
+                        return new ExpenseDTO(newId, expense.getAmount(), newDate, expense.getComment(), expense.getCategoryName());
+                    } else {
+                        throw new SQLException("Не удалось создать запись о расходе, ID не был получен.");
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Обновляет существующую запись о расходе.
+     *
+     * @param expense DTO с обновленными данными. Поле ID используется для идентификации записи.
+     * @throws SQLException если происходит ошибка доступа к БД или запись с указанным ID не найдена.
+     * @throws IllegalArgumentException если указанная категория не найдена.
+     */
+    public void updateExpense(ExpenseDTO expense) throws SQLException {
+        final String sql = "UPDATE expenses SET amount = ?, transaction_date = ?, comment = ?, category_id = ? WHERE id = ?;";
+
+        try (Connection connection = getConnection()) {
+            long categoryId = getCategoryIdByName(connection, "expense_categories", expense.getCategoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория расходов '" + expense.getCategoryName() + "' не найдена."));
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setBigDecimal(1, expense.getAmount());
+                statement.setDate(2, Date.valueOf(expense.getTransactionDate()));
+                statement.setString(3, expense.getComment());
+                statement.setLong(4, categoryId);
+                statement.setLong(5, expense.getId());
+
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLException("Обновление не удалось, расход с id=" + expense.getId() + " не найден.");
+                }
+            }
+        }
+    }
+
+    /**
+     * Удаляет запись о расходе по ее идентификатору.
+     *
+     * @param expenseId ID расхода для удаления.
+     * @throws SQLException если происходит ошибка доступа к БД или запись с указанным ID не найдена.
+     */
+    public void deleteExpense(long expenseId) throws SQLException {
+        final String sql = "DELETE FROM expenses WHERE id = ?;";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, expenseId);
+
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Удаление не удалось, расход с id=" + expenseId + " не найден.");
+            }
+        }
+    }
+
+
+    // =========================================================================
+    // ==== CRUD Operations for Incomes ====
+    // =========================================================================
+
+    /**
+     * Добавляет новую запись о доходе в базу данных.
+     */
+    public IncomeDTO addIncome(IncomeDTO income) throws SQLException {
+        final String sql = "INSERT INTO incomes (amount, transaction_date, comment, category_id) VALUES (?, ?, ?, ?) RETURNING id, transaction_date;";
+
+        try (Connection connection = getConnection()) {
+            long categoryId = getCategoryIdByName(connection, "income_categories", income.getCategoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория доходов '" + income.getCategoryName() + "' не найдена."));
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setBigDecimal(1, income.getAmount());
+                statement.setDate(2, Date.valueOf(income.getTransactionDate()));
+                statement.setString(3, income.getComment());
+                statement.setLong(4, categoryId);
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        long newId = rs.getLong("id");
+                        LocalDate newDate = rs.getDate("transaction_date").toLocalDate();
+                        return new IncomeDTO(newId, income.getAmount(), newDate, income.getComment(), income.getCategoryName());
+                    } else {
+                        throw new SQLException("Не удалось создать запись о доходе, ID не был получен.");
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Обновляет существующую запись о доходе.
+     */
+    public void updateIncome(IncomeDTO income) throws SQLException {
+        final String sql = "UPDATE incomes SET amount = ?, transaction_date = ?, comment = ?, category_id = ? WHERE id = ?;";
+
+        try (Connection connection = getConnection()) {
+            long categoryId = getCategoryIdByName(connection, "income_categories", income.getCategoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория доходов '" + income.getCategoryName() + "' не найдена."));
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setBigDecimal(1, income.getAmount());
+                statement.setDate(2, Date.valueOf(income.getTransactionDate()));
+                statement.setString(3, income.getComment());
+                statement.setLong(4, categoryId);
+                statement.setLong(5, income.getId());
+
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLException("Обновление не удалось, доход с id=" + income.getId() + " не найден.");
+                }
+            }
+        }
+    }
+
+    /**
+     * Удаляет запись о доходе по ее идентификатору.
+     */
+    public void deleteIncome(long incomeId) throws SQLException {
+        final String sql = "DELETE FROM incomes WHERE id = ?;";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, incomeId);
+
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Удаление не удалось, доход с id=" + incomeId + " не найден.");
+            }
+        }
+    }
+
+    // =========================================================================
+    // ==== Helper Methods for Categories (for Frontend UI) ====
+    // =========================================================================
+
+    public List<String> findAllExpenseCategories() throws SQLException {
+        List<String> categories = new ArrayList<>();
+        final String sql = "SELECT name FROM expense_categories ORDER BY name;";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+
+            while (rs.next()) {
+                categories.add(rs.getString("name"));
+            }
+        }
+        return categories;
+    }
+
+    public List<String> findAllIncomeCategories() throws SQLException {
+        List<String> categories = new ArrayList<>();
+        final String sql = "SELECT name FROM income_categories ORDER BY name;";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+
+            while (rs.next()) {
+                categories.add(rs.getString("name"));
+            }
+        }
+        return categories;
+    }
+
+    // =========================================================================
+    // ==== Read-Only, Summary & Aggregate Operations ====
+    // =========================================================================
+
+    public List<ExpenseDTO> findAllExpenses() throws SQLException {
+        List<ExpenseDTO> expenses = new ArrayList<>();
+        final String sql = "SELECT e.id, e.amount, e.transaction_date, e.comment, ec.name AS category_name " +
+                "FROM expenses e " +
+                "JOIN expense_categories ec ON e.category_id = ec.id " +
+                "ORDER BY e.transaction_date DESC, e.id DESC;";
+
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            while (resultSet.next()) {
+                expenses.add(new ExpenseDTO(
+                        resultSet.getLong("id"),
+                        resultSet.getBigDecimal("amount"),
+                        resultSet.getDate("transaction_date").toLocalDate(),
+                        resultSet.getString("comment"),
+                        resultSet.getString("category_name")
+                ));
+            }
+        }
+        return expenses;
+    }
+
+    public List<IncomeDTO> findAllIncomes() throws SQLException {
+        List<IncomeDTO> incomes = new ArrayList<>();
+        final String sql = "SELECT i.id, i.amount, i.transaction_date, i.comment, ic.name AS category_name " +
+                "FROM incomes i " +
+                "JOIN income_categories ic ON i.category_id = ic.id " +
+                "ORDER BY i.transaction_date DESC, i.id DESC;";
+
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            while (resultSet.next()) {
+                incomes.add(new IncomeDTO(
+                        resultSet.getLong("id"),
+                        resultSet.getBigDecimal("amount"),
+                        resultSet.getDate("transaction_date").toLocalDate(),
+                        resultSet.getString("comment"),
+                        resultSet.getString("category_name")
+                ));
+            }
+        }
+        return incomes;
+    }
+
     public List<CategorySummaryDTO> getLastMonthSummary() throws SQLException {
         List<CategorySummaryDTO> summaries = new ArrayList<>();
         String sql = "SELECT * FROM get_last_month_summary_by_category();";
@@ -39,12 +291,9 @@ public class FinancialRepository {
         return summaries;
     }
 
-    /**
-     * Получает расходы по названию категории.
-     */
     public List<ExpenseDTO> findExpensesByCategoryName(String categoryName) throws SQLException {
         List<ExpenseDTO> expenses = new ArrayList<>();
-        String sql = "SELECT e.id, e.amount, e.transaction_date, e.comment " +
+        String sql = "SELECT e.id, e.amount, e.transaction_date, e.comment, ec.name AS category_name " +
                 "FROM expenses e " +
                 "JOIN expense_categories ec ON e.category_id = ec.id " +
                 "WHERE ec.name = ?";
@@ -59,14 +308,14 @@ public class FinancialRepository {
                     BigDecimal amount = resultSet.getBigDecimal("amount");
                     LocalDate date = resultSet.getDate("transaction_date").toLocalDate();
                     String comment = resultSet.getString("comment");
-                    expenses.add(new ExpenseDTO(id, amount, date, comment));
+                    String catName = resultSet.getString("category_name");
+
+                    expenses.add(new ExpenseDTO(id, amount, date, comment, catName));
                 }
             }
         }
         return expenses;
     }
-
-
 
     public List<CategorySummaryDTO> getCurrentMonthIncomeSummary() throws SQLException {
         List<CategorySummaryDTO> summaries = new ArrayList<>();
@@ -85,7 +334,6 @@ public class FinancialRepository {
         return summaries;
     }
 
-
     public List<CategorySummaryDTO> getLastMonthIncomeSummary() throws SQLException {
         List<CategorySummaryDTO> summaries = new ArrayList<>();
         String sql = "SELECT * FROM get_last_month_income_summary_by_category();";
@@ -103,30 +351,6 @@ public class FinancialRepository {
         return summaries;
     }
 
-
-    // Нужно добавить в таблицу поле 'название кредитного продукта' (product_name)
-    public List<LoanOfferDTO> findAllCreditOffers() throws SQLException {
-        List<LoanOfferDTO> offers = new ArrayList<>();
-        // Запрос к таблице с упрощенными именами колонок
-        String sql = "SELECT id, bank_name, amount, rate, term, total_cost FROM credit_offers ORDER BY bank_name;";
-
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
-
-            while (resultSet.next()) {
-                String bankName = resultSet.getString("bank_name");
-                String amount = resultSet.getString("amount");
-                String rate = resultSet.getString("rate");
-                String term = resultSet.getString("term");
-                String totalCost = resultSet.getString("total_cost");
-
-                // Создаем DTO и добавляем в список
-                // offers.add(new LoanOfferDTO(bankName, amount, rate, term, totalCost));
-            }
-        }
-        return offers;
-    }
     public List<MonthlyFinancialSummaryDTO> getMonthlyFinancialSummary() throws SQLException {
         List<MonthlyFinancialSummaryDTO> summaryList = new ArrayList<>();
         String sql = "SELECT * FROM get_full_monthly_summary();";
@@ -145,5 +369,50 @@ public class FinancialRepository {
             }
         }
         return summaryList;
+    }
+
+    // Примечание: предполагаю, что класс LoanOfferDTO существует в вашем проекте.
+    public List<LoanOfferDTO> findAllCreditOffers() throws SQLException {
+        List<LoanOfferDTO> offers = new ArrayList<>();
+        String sql = "SELECT bank_name, product_name, amount, rate, term, total_cost FROM credit_offers ORDER BY bank_name;";
+
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
+            while (resultSet.next()) {
+                String bankName = resultSet.getString("bank_name");
+                String productName = resultSet.getString("product_name");
+                String amount = resultSet.getString("amount");
+                String rate = resultSet.getString("rate");
+                String term = resultSet.getString("term");
+                String totalCost = resultSet.getString("total_cost");
+
+                offers.add(new LoanOfferDTO(bankName, productName, amount, rate, term, totalCost));
+            }
+        }
+        return offers;
+    }
+
+    // =========================================================================
+    // ==== Private Helper Methods ====
+    // =========================================================================
+
+    private Optional<Long> getCategoryIdByName(Connection connection, String categoryTable, String name) throws SQLException {
+        if (!categoryTable.equals("expense_categories") && !categoryTable.equals("income_categories")) {
+            throw new IllegalArgumentException("Недопустимое имя таблицы категорий.");
+        }
+
+        final String sql = "SELECT id FROM " + categoryTable + " WHERE name = ?;";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, name);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(rs.getLong("id"));
+                }
+            }
+        }
+        return Optional.empty();
     }
 }
