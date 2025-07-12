@@ -19,6 +19,17 @@ public final class LoanOffersRequest extends LlmAgentRequest {
         loanOfferPath += fileName;
     }
 
+    public LoanOffersRequest(MimeType mimeType, String filePath, boolean isAbsoluteFilePath) {
+        super(MAIN_REQUEST);
+        this.mimeType = mimeType;
+
+        if (isAbsoluteFilePath) {
+            loanOfferPath = filePath;
+        } else {
+            loanOfferPath += filePath;
+        }
+    }
+
     public MimeType getMimeType() {
         return mimeType;
     }

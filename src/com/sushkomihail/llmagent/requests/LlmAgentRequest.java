@@ -2,11 +2,8 @@ package com.sushkomihail.llmagent.requests;
 
 import chat.giga.model.completion.ChatFunction;
 
-/**
- * Абстрактный класс запроса к llm-агенту
- */
 public abstract class LlmAgentRequest {
-    private String request;
+    private final String request;
 
     public LlmAgentRequest(String request) {
         this.request = request;
@@ -14,10 +11,6 @@ public abstract class LlmAgentRequest {
 
     public String getRequest() {
         return request;
-    }
-
-    public void setRequest(String request) {
-        this.request = request;
     }
 
     /**

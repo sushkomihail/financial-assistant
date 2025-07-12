@@ -39,20 +39,20 @@ public class FinancialRepository {
         final String sql = "INSERT INTO expenses (amount, transaction_date, comment, category_id) VALUES (?, ?, ?, ?) RETURNING id, transaction_date;";
 
         try (Connection connection = getConnection()) {
-            long categoryId = getCategoryIdByName(connection, "expense_categories", expense.getCategoryName())
-                    .orElseThrow(() -> new IllegalArgumentException("Категория расходов '" + expense.getCategoryName() + "' не найдена."));
+            long categoryId = getCategoryIdByName(connection, "expense_categories", expense.categoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория расходов '" + expense.categoryName() + "' не найдена."));
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setBigDecimal(1, expense.getAmount());
-                statement.setDate(2, Date.valueOf(expense.getTransactionDate()));
-                statement.setString(3, expense.getComment());
+                statement.setBigDecimal(1, expense.amount());
+                statement.setDate(2, Date.valueOf(expense.transactionDate()));
+                statement.setString(3, expense.comment());
                 statement.setLong(4, categoryId);
 
                 try (ResultSet rs = statement.executeQuery()) {
                     if (rs.next()) {
                         long newId = rs.getLong("id");
                         LocalDate newDate = rs.getDate("transaction_date").toLocalDate();
-                        return new ExpenseDTO(newId, expense.getAmount(), newDate, expense.getComment(), expense.getCategoryName());
+                        return new ExpenseDTO(newId, expense.amount(), newDate, expense.comment(), expense.categoryName());
                     } else {
                         throw new SQLException("Не удалось создать запись о расходе, ID не был получен.");
                     }
@@ -72,19 +72,19 @@ public class FinancialRepository {
         final String sql = "UPDATE expenses SET amount = ?, transaction_date = ?, comment = ?, category_id = ? WHERE id = ?;";
 
         try (Connection connection = getConnection()) {
-            long categoryId = getCategoryIdByName(connection, "expense_categories", expense.getCategoryName())
-                    .orElseThrow(() -> new IllegalArgumentException("Категория расходов '" + expense.getCategoryName() + "' не найдена."));
+            long categoryId = getCategoryIdByName(connection, "expense_categories", expense.categoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория расходов '" + expense.categoryName() + "' не найдена."));
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setBigDecimal(1, expense.getAmount());
-                statement.setDate(2, Date.valueOf(expense.getTransactionDate()));
-                statement.setString(3, expense.getComment());
+                statement.setBigDecimal(1, expense.amount());
+                statement.setDate(2, Date.valueOf(expense.transactionDate()));
+                statement.setString(3, expense.comment());
                 statement.setLong(4, categoryId);
-                statement.setLong(5, expense.getId());
+                statement.setLong(5, expense.id());
 
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows == 0) {
-                    throw new SQLException("Обновление не удалось, расход с id=" + expense.getId() + " не найден.");
+                    throw new SQLException("Обновление не удалось, расход с id=" + expense.id() + " не найден.");
                 }
             }
         }
@@ -123,20 +123,20 @@ public class FinancialRepository {
         final String sql = "INSERT INTO incomes (amount, transaction_date, comment, category_id) VALUES (?, ?, ?, ?) RETURNING id, transaction_date;";
 
         try (Connection connection = getConnection()) {
-            long categoryId = getCategoryIdByName(connection, "income_categories", income.getCategoryName())
-                    .orElseThrow(() -> new IllegalArgumentException("Категория доходов '" + income.getCategoryName() + "' не найдена."));
+            long categoryId = getCategoryIdByName(connection, "income_categories", income.categoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория доходов '" + income.categoryName() + "' не найдена."));
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setBigDecimal(1, income.getAmount());
-                statement.setDate(2, Date.valueOf(income.getTransactionDate()));
-                statement.setString(3, income.getComment());
+                statement.setBigDecimal(1, income.amount());
+                statement.setDate(2, Date.valueOf(income.transactionDate()));
+                statement.setString(3, income.comment());
                 statement.setLong(4, categoryId);
 
                 try (ResultSet rs = statement.executeQuery()) {
                     if (rs.next()) {
                         long newId = rs.getLong("id");
                         LocalDate newDate = rs.getDate("transaction_date").toLocalDate();
-                        return new IncomeDTO(newId, income.getAmount(), newDate, income.getComment(), income.getCategoryName());
+                        return new IncomeDTO(newId, income.amount(), newDate, income.comment(), income.categoryName());
                     } else {
                         throw new SQLException("Не удалось создать запись о доходе, ID не был получен.");
                     }
@@ -152,19 +152,19 @@ public class FinancialRepository {
         final String sql = "UPDATE incomes SET amount = ?, transaction_date = ?, comment = ?, category_id = ? WHERE id = ?;";
 
         try (Connection connection = getConnection()) {
-            long categoryId = getCategoryIdByName(connection, "income_categories", income.getCategoryName())
-                    .orElseThrow(() -> new IllegalArgumentException("Категория доходов '" + income.getCategoryName() + "' не найдена."));
+            long categoryId = getCategoryIdByName(connection, "income_categories", income.categoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория доходов '" + income.categoryName() + "' не найдена."));
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setBigDecimal(1, income.getAmount());
-                statement.setDate(2, Date.valueOf(income.getTransactionDate()));
-                statement.setString(3, income.getComment());
+                statement.setBigDecimal(1, income.amount());
+                statement.setDate(2, Date.valueOf(income.transactionDate()));
+                statement.setString(3, income.comment());
                 statement.setLong(4, categoryId);
-                statement.setLong(5, income.getId());
+                statement.setLong(5, income.id());
 
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows == 0) {
-                    throw new SQLException("Обновление не удалось, доход с id=" + income.getId() + " не найден.");
+                    throw new SQLException("Обновление не удалось, доход с id=" + income.id() + " не найден.");
                 }
             }
         }

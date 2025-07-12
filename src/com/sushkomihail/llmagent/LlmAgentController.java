@@ -4,10 +4,14 @@ import chat.giga.model.ModelName;
 import chat.giga.model.completion.ChatMessageRole;
 import chat.giga.model.completion.CompletionResponse;
 import com.kolesnikovroman.LoanOfferDTO;
+import com.sushkomihail.datastructures.TransactionsCollection;
+import com.sushkomihail.llmagent.requests.LlmAgentWithFileRequest;
 import com.sushkomihail.llmagent.requests.LoanOffersRequest;
 import com.sushkomihail.llmagent.requests.SavingsForecastRequest;
+import com.sushkomihail.llmagent.requests.TransactionsCollectionRequest;
 import com.sushkomihail.llmagent.responsehandlers.LoanOffersResponseHandler;
 import com.sushkomihail.llmagent.responsehandlers.SavingsForecastResponseHandler;
+import com.sushkomihail.llmagent.responsehandlers.TransactionsCollectionResponseHandler;
 
 import java.util.*;
 
@@ -56,5 +60,31 @@ public class LlmAgentController {
                 agent.handleRequestWithFunction(ModelName.GIGA_CHAT, request.getLlmAgentFunction());
         SavingsForecastResponseHandler responseHandler = new SavingsForecastResponseHandler(response);
         return responseHandler.handle();
+    }
+
+    /**
+     * Получение доходов и расходов из загруженного файла
+     * @return коллекция, содержащая массивы доходов и расходов
+     */
+    public TransactionsCollection getTransactions(TransactionsCollectionRequest request) {
+        CompletionResponse response = getWithFileRequestResponse(request);
+        TransactionsCollectionResponseHandler responseHandler = new TransactionsCollectionResponseHandler(response);
+        return responseHandler.handle();
+    }
+
+    /**
+     * Получение ответа на запрос с файлом
+     * @param request - объект содержащий запрос к нейросети
+     * @return объект, содержащий ответ нейросети
+     */
+    private CompletionResponse getWithFileRequestResponse(LlmAgentWithFileRequest request) {
+        agent.deleteAllFiles();
+        agent.clearMessagesHistory();
+
+        UUID fileId = agent.uploadFile(request.getFilePath(), request.getMimeType().getTitle());
+        agent.addMessageToHistory(ChatMessageRole.SYSTEM, request.getRequest(),
+                new ArrayList<>(Collections.singletonList(fileId.toString())));
+
+        return agent.handleRequest(ModelName.GIGA_CHAT);
     }
 }
