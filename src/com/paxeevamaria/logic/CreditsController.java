@@ -5,6 +5,8 @@ import com.kolesnikovroman.CreditOfferRepository;
 import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.LoanOfferDTO;
 import com.sushkomihail.llmagent.LlmAgentController;
+import com.sushkomihail.llmagent.requests.LoanOfferRequest;
+import com.sushkomihail.llmagent.requests.MimeType;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,7 +15,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -112,6 +116,42 @@ public class CreditsController {
         });
 
         new Thread(recommendationTask).start();
+    }
+
+    @FXML
+    private void handleUploadDocument() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Выберите документ");
+
+        // Установка фильтров для расширений файлов
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Все файлы", "*.*"),
+                new FileChooser.ExtensionFilter("Текстовые файлы", "*.txt"),
+                new FileChooser.ExtensionFilter("PDF документы", "*.pdf"),
+                new FileChooser.ExtensionFilter("Документы Word", "*.docx", "*.doc"),
+                new FileChooser.ExtensionFilter("Электронные книги ", "*.epub"),
+                new FileChooser.ExtensionFilter("Презентация", "*.ppt", "*.pptx")
+        );
+
+        // Показ диалога выбора файла
+        File selectedFile = fileChooser.showOpenDialog(creditsTable.getScene().getWindow());
+
+        if (selectedFile != null) {
+            // Абсолютный путь к файлу
+            String absolutePath = selectedFile.getAbsolutePath();
+            showInformationAlert("Файл загружен", "Выбран файл: " + selectedFile.getName());
+
+            List<LoanOfferDTO> loanOffers = llmAgentController.getLoanOffers(
+                    null, new LoanOfferRequest(MimeType.PDF, absolutePath));
+        }
+    }
+
+    private void showInformationAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     private void showAlert(String title, String header, String content) {

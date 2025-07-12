@@ -46,7 +46,7 @@
         <HBox spacing="10" alignment="CENTER">
             <Button text="Обновить" onAction="#handleRefresh" styleClass="action-button"/>
             <Button text="Получить рекомендацию" onAction="#handleGetRecommendation" styleClass="action-button"/>
-            <Button text="Загрузить документ" styleClass="action-button"/>
+            <Button text="Загрузить документ" onAction="#handleUploadDocument" styleClass="action-button"/>
         </HBox>
 
         <!-- Блок с рекомендацией -->
