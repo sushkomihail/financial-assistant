@@ -2,10 +2,12 @@ package com.sushkomihail;
 
 import com.kolesnikovroman.CreditOfferRepository;
 import com.kolesnikovroman.LoanOfferDTO;
+import com.sushkomihail.datastructures.TransactionsCollection;
 import com.sushkomihail.llmagent.GigaChatAgent;
 import com.sushkomihail.llmagent.LlmAgentController;
 import com.sushkomihail.llmagent.requests.LoanOffersRequest;
 import com.sushkomihail.llmagent.requests.MimeType;
+import com.sushkomihail.llmagent.requests.TransactionsCollectionRequest;
 
 import java.io.FileInputStream;
 import java.util.List;
@@ -32,10 +34,13 @@ public class Main {
 //            System.out.println(savings.toString());
 
             // Пример получения кредитных предложений от конкретного банка
-            List<LoanOfferDTO> loanOffers = controller.getLoanOffers(
-                    null,
-                    new LoanOffersRequest(MimeType.PDF, "C:/AltSTU/OOP/Lab2/02_21_Sushko.pdf", true));
-            System.out.println(loanOffers.size());
+//            List<LoanOfferDTO> loanOffers = controller.getLoanOffers(
+//                    null,
+//                    new LoanOffersRequest(MimeType.PDF, "C:/AltSTU/OOP/Lab2/02_21_Sushko.pdf", true));
+//            System.out.println(loanOffers.size());
+            TransactionsCollection collection = controller.getTransactions(
+                    new TransactionsCollectionRequest(MimeType.TXT, "res/test.txt"));
+            System.out.println(collection.getIncomes());
 
 
             // --------------- Analytics -----------------
