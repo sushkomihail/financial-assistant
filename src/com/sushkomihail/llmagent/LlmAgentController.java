@@ -88,4 +88,12 @@ public class LlmAgentController {
 
         return agent.handleRequest(ModelName.GIGA_CHAT);
     }
+
+    public String getResponse(String prompt) {
+        agent.clearMessagesHistory();
+        agent.addMessageToHistory(ChatMessageRole.USER, prompt, null);
+
+        CompletionResponse response = agent.handleRequest(ModelName.GIGA_CHAT);
+        return response.choices().get(0).message().content();
+    }
 }

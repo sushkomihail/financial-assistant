@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            stylesheets="@../styles/style.css"
+            fx:controller="com.paxeevamaria.logic.IncomeController">
+
+    <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10">
+        <!-- Строка фильтров -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Фильтры:" styleClass="filter-label"/>
+
+            <ComboBox fx:id="categoryComboBox" promptText="Все категории" prefWidth="200"/>
+
+            <DatePicker fx:id="startDatePicker" promptText="С даты"/>
+            <Label text="-"/>
+            <DatePicker fx:id="endDatePicker" promptText="По дату"/>
+
+            <Button text="Применить" onAction="#handleApplyFilters" />
+            <Button text="Сбросить" onAction="#handleResetFilters"/>
+        </HBox>
+
+        <!-- Кнопки управления -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button text="Добавить" onAction="#handleAddIncome" styleClass="add-button"/>
+            <Button text="Изменить" onAction="#handleEditIncome" styleClass="edit-button"/>
+            <Button text="Удалить" onAction="#handleDeleteIncome" styleClass="delete-button"/>
+        </HBox>
+
+        <!-- Сводная информация -->
+        <HBox spacing="20" styleClass="summary-box">
+            <VBox styleClass="summary-item">
+                <Label text="Общий доход:" styleClass="summary-label"/>
+                <Label fx:id="totalAmountLabel" text="0.00 ₽" styleClass="summary-value"/>
+            </VBox>
+            <VBox styleClass="summary-item">
+                <Label text="Количество записей:" styleClass="summary-label"/>
+                <Label fx:id="recordsCountLabel" text="0" styleClass="summary-value"/>
+            </VBox>
+            <VBox styleClass="summary-item">
+                <Label text="Средний доход:" styleClass="summary-label"/>
+                <Label fx:id="averageAmountLabel" text="0.00 ₽" styleClass="summary-value"/>
+            </VBox>
+        </HBox>
+
+        <!-- Таблица доходов -->
+        <TableView fx:id="incomesTable" styleClass="income-table">
+            <columns>
+                <TableColumn text="Дата" prefWidth="100" fx:id="dateColumn"/>
+                <TableColumn text="Категория" prefWidth="150" fx:id="categoryColumn"/>
+                <TableColumn text="Сумма" prefWidth="120" fx:id="amountColumn"/>
+                <TableColumn text="Комментарий" prefWidth="250" fx:id="commentColumn"/>
+            </columns>
+        </TableView>
+    </VBox>
+</AnchorPane>

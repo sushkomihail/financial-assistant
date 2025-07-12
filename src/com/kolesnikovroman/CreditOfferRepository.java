@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public class CreditOfferRepository {
-    private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/financial_assistant";
+    private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/FinanceDataBase";
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "12345";
 

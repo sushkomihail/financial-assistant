@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.paxeevamaria.logic.CreditsController"
+            styleClass="credits-scroll-pane">
+
+    <VBox spacing="20" styleClass="credits-container">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+
+        <!-- Заголовок -->
+        <Label text="Кредитные предложения" styleClass="credits-header">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Label>
+
+        <!-- Блок с актуальностью данных -->
+        <HBox alignment="CENTER_RIGHT">
+            <Label text="Актуально на июль 2025" styleClass="actual-date-label"/>
+        </HBox>
+
+        <!-- Таблица с кредитными предложениями -->
+        <TableView fx:id="creditsTable" styleClass="credits-table">
+            <columns>
+                <TableColumn text="Банк" fx:id="bankColumn" styleClass="table-column"/>
+                <TableColumn text="Продукт" fx:id="productColumn" styleClass="table-column"/>
+                <TableColumn text="Сумма" fx:id="amountColumn" styleClass="table-column"/>
+                <TableColumn text="Ставка" fx:id="rateColumn" styleClass="table-column"/>
+                <TableColumn text="Срок" fx:id="termColumn" styleClass="table-column"/>
+                <TableColumn text="Общая стоимость" fx:id="totalCostColumn" styleClass="table-column"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+
+        <!-- Кнопки управления -->
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="Обновить" onAction="#handleRefresh" styleClass="action-button"/>
+            <Button text="Получить рекомендацию" onAction="#handleGetRecommendation" styleClass="action-button"/>
+            <Button text="Загрузить документ" onAction="#handleUploadDocument" styleClass="action-button"/>
+        </HBox>
+
+        <!-- Блок с рекомендацией -->
+        <VBox fx:id="recommendationBox" visible="false" spacing="10" styleClass="recommendation-box">
+            <Label text="Рекомендация:" styleClass="recommendation-header"/>
+            <TextArea fx:id="recommendationText" editable="false" wrapText="true"
+                      styleClass="recommendation-text"/>
+        </VBox>
+    </VBox>
+</ScrollPane>

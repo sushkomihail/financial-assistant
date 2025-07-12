@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            stylesheets="@../styles/style.css"
+            fx:controller="com.paxeevamaria.logic.RootController">
+
+    <!-- Верхняя панель - меню -->
+    <top>
+        <MenuBar>
+            <Menu text="Файл">
+                <MenuItem text="Выход" onAction="#handleExit"/>
+            </Menu>
+            <Menu text="Операции">
+                <MenuItem text="Доходы" onAction="#showIncome"/>
+                <MenuItem text="Расходы" onAction="#showExpense"/>
+            </Menu>
+            <Menu text="Аналитика">
+                <MenuItem text="Кредиты" onAction="#showCredit"/>
+            </Menu>
+        </MenuBar>
+
+    </top>
+
+    <!-- Левая панель - навигация -->
+    <left>
+        <VBox spacing="10" styleClass="sidebar">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Button text="Главная" onAction="#showDashboard" styleClass="nav-button">
+                <padding>
+                    <Insets top="5" right="10" bottom="5" left="10"/>
+                </padding>
+            </Button>
+            <Button text="Доходы" onAction="#showIncome" styleClass="nav-button">
+                <padding>
+                    <Insets top="5" right="10" bottom="5" left="10"/>
+                </padding>
+            </Button>
+            <Button text="Расходы" onAction="#showExpense" styleClass="nav-button">
+                <padding>
+                    <Insets top="5" right="10" bottom="5" left="10"/>
+                </padding>
+            </Button>
+            <Button text="Кредиты" onAction="#showCredit" styleClass="nav-button">
+                <padding>
+                    <Insets top="5" right="10" bottom="5" left="10"/>
+                </padding>
+            </Button>
+        </VBox>
+    </left>
+
+    <!-- Центральная область (здесь будет динамически отображаться содержимое) -->
+    <center>
+    </center>
+
+</BorderPane>
