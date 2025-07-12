@@ -3,7 +3,6 @@ package com.kolesnikovroman;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 
 public class DataBaseConnection {
@@ -48,17 +47,17 @@ public class DataBaseConnection {
 
         // --- 2. SELECT TARGET: Выбираем первую запись из списка как нашу цель ---
         ExpenseDTO targetExpense = initialExpenses.get(0);
-        long targetId = targetExpense.getId();
-        System.out.println("\n[2] TARGET: Для теста выбрана запись с id=" + targetId + " -> \"" + targetExpense.getComment() + "\"");
+        long targetId = targetExpense.id();
+        System.out.println("\n[2] TARGET: Для теста выбрана запись с id=" + targetId + " -> \"" + targetExpense.comment() + "\"");
 
         // --- 3. UPDATE: Изменяем выбранную запись ---
         System.out.println("\n[3] UPDATE: Обновляем комментарий и сумму для расхода с id=" + targetId);
         ExpenseDTO expenseToUpdate = new ExpenseDTO(
                 targetId, // ID остается тем же
-                targetExpense.getAmount().add(new BigDecimal("100.00")), // Увеличиваем сумму на 100
-                targetExpense.getTransactionDate(),
-                targetExpense.getComment() + " (ОБНОВЛЕНО)", // Добавляем метку в комментарий
-                targetExpense.getCategoryName() // Категорию оставляем прежней
+                targetExpense.amount().add(new BigDecimal("100.00")), // Увеличиваем сумму на 100
+                targetExpense.transactionDate(),
+                targetExpense.comment() + " (ОБНОВЛЕНО)", // Добавляем метку в комментарий
+                targetExpense.categoryName() // Категорию оставляем прежней
         );
         repository.updateExpense(expenseToUpdate);
         System.out.println("  -> Запись успешно обновлена.");

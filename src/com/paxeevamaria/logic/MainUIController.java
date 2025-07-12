@@ -4,7 +4,7 @@ import com.kolesnikovroman.CategorySummaryDTO;
 import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.MonthlyFinancialSummaryDTO;
 import com.sushkomihail.llmagent.LlmAgentController;
-import com.sushkomihail.llmagent.datastructures.NetIncomesCollection;
+import com.sushkomihail.datastructures.NetIncomesCollection;
 import com.sushkomihail.llmagent.requests.SavingsForecastRequest;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;

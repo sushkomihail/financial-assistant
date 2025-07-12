@@ -177,11 +177,11 @@ public class ExpenseController {
             grid.setVgap(10);
             grid.setPadding(new Insets(20, 150, 10, 10));
 
-            DatePicker datePicker = new DatePicker(selected.getTransactionDate());
+            DatePicker datePicker = new DatePicker(selected.transactionDate());
             ComboBox<String> categoryCombo = new ComboBox<>(allCategories.filtered(c -> !c.equals("Все категории")));
-            categoryCombo.setValue(selected.getCategoryName());
-            TextField amountField = new TextField(selected.getAmount().toString());
-            TextArea commentArea = new TextArea(selected.getComment());
+            categoryCombo.setValue(selected.categoryName());
+            TextField amountField = new TextField(selected.amount().toString());
+            TextArea commentArea = new TextArea(selected.comment());
 
             grid.add(new Label("Дата:"), 0, 0);
             grid.add(datePicker, 1, 0);
@@ -198,7 +198,7 @@ public class ExpenseController {
                 if (dialogButton == ButtonType.OK) {
                     try {
                         BigDecimal amount = new BigDecimal(amountField.getText());
-                        return new ExpenseDTO(selected.getId(), amount, datePicker.getValue(),
+                        return new ExpenseDTO(selected.id(), amount, datePicker.getValue(),
                                 commentArea.getText(), categoryCombo.getValue());
                     } catch (NumberFormatException e) {
                         showError("Ошибка", "Некорректная сумма");
@@ -237,14 +237,14 @@ public class ExpenseController {
         alert.setTitle("Подтверждение удаления");
         alert.setHeaderText("Вы действительно хотите удалить выбранный расход?");
         alert.setContentText(String.format("Дата: %s\nКатегория: %s\nСумма: %,.2f ₽",
-                selected.getTransactionDate(),
-                selected.getCategoryName(),
-                selected.getAmount()));
+                selected.transactionDate(),
+                selected.categoryName(),
+                selected.amount()));
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                financialRepository.deleteExpense(selected.getId());
+                financialRepository.deleteExpense(selected.id());
                 allExpenses.remove(selected);
                 updateSummary();
             } catch (SQLException e) {
@@ -262,15 +262,15 @@ public class ExpenseController {
         ObservableList<ExpenseDTO> filtered = allExpenses.filtered(expense -> {
             // Фильтр по категории
             if (selectedCategory != null && !selectedCategory.equals("Все категории")
-                    && !expense.getCategoryName().equals(selectedCategory)) {
+                    && !expense.categoryName().equals(selectedCategory)) {
                 return false;
             }
 
             // Фильтр по дате
-            if (startDate != null && expense.getTransactionDate().isBefore(startDate)) {
+            if (startDate != null && expense.transactionDate().isBefore(startDate)) {
                 return false;
             }
-            if (endDate != null && expense.getTransactionDate().isAfter(endDate)) {
+            if (endDate != null && expense.transactionDate().isAfter(endDate)) {
                 return false;
             }
 
@@ -292,7 +292,7 @@ public class ExpenseController {
 
     private void updateSummary() {
         BigDecimal total = expensesTable.getItems().stream()
-                .map(ExpenseDTO::getAmount)
+                .map(ExpenseDTO::amount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         totalAmountLabel.setText(String.format("%,.2f ₽", total));

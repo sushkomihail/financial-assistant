@@ -9,7 +9,7 @@ public final class DifferentiatedPaymentLoan extends Loan {
 
     @Override
     protected String getPaymentType() {
-        return "Дифференцированный";
+        return PaymentType.DIFFERENTIATED.getTitle();
     }
 
     @Override

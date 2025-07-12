@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 public class CreditOfferRepository {
-
     private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/FinanceDataBase";
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "12345";
@@ -18,7 +17,6 @@ public class CreditOfferRepository {
 
     /**
      * Возвращает множество уникальных имен банков, кредитные предложения которых уже есть в БД.
-
      * @return Set с именами существующих банков.
      * @throws SQLException при ошибке доступа к БД.
      */
@@ -43,7 +41,8 @@ public class CreditOfferRepository {
      * @throws SQLException при ошибке доступа к БД.
      */
     public void add(LoanOfferDTO offer) throws SQLException {
-        final String sql = "INSERT INTO credit_offers (bank_name, product_name, amount, rate, term, total_cost) VALUES (?, ?, ?, ?, ?, ?);";
+        final String sql = "INSERT INTO credit_offers (bank_name, product_name, amount, rate, term, total_cost) " +
+                "VALUES (?, ?, ?, ?, ?, ?);";
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {

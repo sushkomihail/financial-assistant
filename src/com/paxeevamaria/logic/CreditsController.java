@@ -5,7 +5,7 @@ import com.kolesnikovroman.CreditOfferRepository;
 import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.LoanOfferDTO;
 import com.sushkomihail.llmagent.LlmAgentController;
-import com.sushkomihail.llmagent.requests.LoanOfferRequest;
+import com.sushkomihail.llmagent.requests.LoanOffersRequest;
 import com.sushkomihail.llmagent.requests.MimeType;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -118,6 +118,7 @@ public class CreditsController {
         new Thread(recommendationTask).start();
     }
 
+    // Обработка загрузки файла с кредитными предложениями
     @FXML
     private void handleUploadDocument() {
         FileChooser fileChooser = new FileChooser();
@@ -141,8 +142,40 @@ public class CreditsController {
             String absolutePath = selectedFile.getAbsolutePath();
             showInformationAlert("Файл загружен", "Выбран файл: " + selectedFile.getName());
 
-            List<LoanOfferDTO> loanOffers = llmAgentController.getLoanOffers(
-                    null, new LoanOfferRequest(MimeType.PDF, absolutePath));
+            // Создание Task для асинхронной обработки файла
+            Task<List<LoanOfferDTO>> uploadTask = new Task<>() {
+                @Override
+                protected List<LoanOfferDTO> call() throws Exception {
+                    return llmAgentController.getLoanOffers(
+                            null, new LoanOffersRequest(MimeType.PDF, absolutePath, true));
+                }
+            };
+
+            uploadTask.setOnSucceeded(e -> {
+                // Результат обработки файла
+                List<LoanOfferDTO> newOffers = uploadTask.getValue()
+                        .stream()
+                        .map(offer -> new LoanOfferDTO(
+                                "Банк",  // Заглушка
+                                offer.productName(),
+                                offer.amount(),
+                                offer.rate(),
+                                offer.term(),
+                                offer.fullLoanCost()
+                        ))
+                        .toList();
+                // Добавление новых предложений в таблицу
+                offersData.addAll(newOffers);
+
+                showInformationAlert("Успех", "Добавлено " + newOffers.size() + " новых предложений");
+            });
+
+            uploadTask.setOnFailed(e -> {
+                showAlert("Ошибка", "Не удалось обработать файл",
+                        uploadTask.getException().getMessage());
+            });
+
+            new Thread(uploadTask).start();
         }
     }
 

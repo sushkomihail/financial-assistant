@@ -3,7 +3,7 @@ package com.sushkomihail.llmagent.requests;
 import chat.giga.model.completion.ChatFunction;
 
 public abstract class LlmAgentRequest {
-    private String request;
+    private final String request;
 
     public LlmAgentRequest(String request) {
         this.request = request;
@@ -13,10 +13,10 @@ public abstract class LlmAgentRequest {
         return request;
     }
 
-    public void setRequest(String request) {
-        this.request = request;
-    }
-
+    /**
+     * Виртуальная функция для получения пользовательской функции для llm-агента
+     * @return пользовательскую функцию
+     */
     public ChatFunction getLlmAgentFunction() {
         return null;
     }

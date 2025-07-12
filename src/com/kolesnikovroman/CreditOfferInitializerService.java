@@ -1,14 +1,13 @@
 package com.kolesnikovroman;
 
 import com.sushkomihail.llmagent.LlmAgentController;
-import com.sushkomihail.llmagent.requests.LoanOfferRequest;
+import com.sushkomihail.llmagent.requests.LoanOffersRequest;
 import com.sushkomihail.llmagent.requests.MimeType;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 
 public class CreditOfferInitializerService {
 
@@ -76,7 +75,7 @@ public class CreditOfferInitializerService {
      */
     private void processNewBank(String bankName, String fileName) {
         try {
-            LoanOfferRequest request = new LoanOfferRequest(MimeType.PDF, fileName);
+            LoanOffersRequest request = new LoanOffersRequest(MimeType.PDF, fileName);
 
             System.out.println("    [LLM]: Отправка запроса к нейросети...");
             List<LoanOfferDTO> offersFromAI = llmController.getLoanOffers(bankName, request);

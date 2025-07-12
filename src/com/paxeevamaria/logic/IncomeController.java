@@ -172,11 +172,11 @@ public class IncomeController {
         grid.setVgap(10);
         grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
 
-        DatePicker datePicker = new DatePicker(selected.getTransactionDate());
+        DatePicker datePicker = new DatePicker(selected.transactionDate());
         ComboBox<String> categoryCombo = new ComboBox<>(allCategories.filtered(c -> !c.equals("Все категории")));
-        categoryCombo.setValue(selected.getCategoryName());
-        TextField amountField = new TextField(selected.getAmount().toString());
-        TextArea commentArea = new TextArea(selected.getComment());
+        categoryCombo.setValue(selected.categoryName());
+        TextField amountField = new TextField(selected.amount().toString());
+        TextArea commentArea = new TextArea(selected.comment());
 
         grid.add(new Label("Дата:"), 0, 0);
         grid.add(datePicker, 1, 0);
@@ -193,7 +193,7 @@ public class IncomeController {
             if (dialogButton == ButtonType.OK) {
                 try {
                     BigDecimal amount = new BigDecimal(amountField.getText());
-                    return new IncomeDTO(selected.getId(), amount, datePicker.getValue(),
+                    return new IncomeDTO(selected.id(), amount, datePicker.getValue(),
                             commentArea.getText(), categoryCombo.getValue());
                 } catch (NumberFormatException e) {
                     showError("Ошибка", "Некорректная сумма");
@@ -228,14 +228,14 @@ public class IncomeController {
         alert.setTitle("Подтверждение удаления");
         alert.setHeaderText("Вы действительно хотите удалить выбранный доход?");
         alert.setContentText(String.format("Дата: %s\nКатегория: %s\nСумма: %,.2f ₽",
-                selected.getTransactionDate(),
-                selected.getCategoryName(),
-                selected.getAmount()));
+                selected.transactionDate(),
+                selected.categoryName(),
+                selected.amount()));
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                financialRepository.deleteIncome(selected.getId());
+                financialRepository.deleteIncome(selected.id());
                 allIncomes.remove(selected);
                 updateSummary();
             } catch (SQLException e) {
@@ -252,14 +252,14 @@ public class IncomeController {
 
         ObservableList<IncomeDTO> filtered = allIncomes.filtered(income -> {
             if (selectedCategory != null && !selectedCategory.equals("Все категории")
-                    && !income.getCategoryName().equals(selectedCategory)) {
+                    && !income.categoryName().equals(selectedCategory)) {
                 return false;
             }
 
-            if (startDate != null && income.getTransactionDate().isBefore(startDate)) {
+            if (startDate != null && income.transactionDate().isBefore(startDate)) {
                 return false;
             }
-            if (endDate != null && income.getTransactionDate().isAfter(endDate)) {
+            if (endDate != null && income.transactionDate().isAfter(endDate)) {
                 return false;
             }
 
@@ -284,7 +284,7 @@ public class IncomeController {
         int count = currentIncomes.size();
 
         BigDecimal total = currentIncomes.stream()
-                .map(IncomeDTO::getAmount)
+                .map(IncomeDTO::amount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal average = count > 0

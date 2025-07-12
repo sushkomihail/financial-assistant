@@ -9,10 +9,10 @@ import com.kolesnikovroman.LoanOfferDTO;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoanOfferResponseHandler extends LlmAgentResponseHandler<List<LoanOfferDTO>> {
+public final class LoanOffersResponseHandler extends LlmAgentResponseHandler<List<LoanOfferDTO>> {
     private final String bankName;
 
-    public LoanOfferResponseHandler(String bankName, CompletionResponse response) {
+    public LoanOffersResponseHandler(String bankName, CompletionResponse response) {
         super(response);
         this.bankName = bankName;
     }
@@ -36,7 +36,8 @@ public class LoanOfferResponseHandler extends LlmAgentResponseHandler<List<LoanO
                 offers.add(new LoanOfferDTO(bankName, productName, amount, rate, term, fullLoanCost));
             }
         } catch (JsonProcessingException e) {
-            System.err.println("Unable to convert to json. Error: " + e.getMessage());
+            System.err.println("[ERROR][class LoanOffersRequestHandler]: Unable to convert to json. " +
+                    "Error: " + e.getMessage());
         }
 
         return offers;
