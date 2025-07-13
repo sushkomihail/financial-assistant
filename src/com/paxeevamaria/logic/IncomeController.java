@@ -11,8 +11,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -78,6 +81,36 @@ public class IncomeController {
         );
         loadCategories();
         loadIncomes();
+
+        createContextMenu();
+    }
+
+    // Создание контекстного меню
+    private void createContextMenu() {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem editItem = new MenuItem("Изменить");
+        MenuItem deleteItem = new MenuItem("Удалить");
+
+        editItem.setOnAction(event -> handleEditIncome());
+        deleteItem.setOnAction(event -> handleDeleteIncome());
+
+        contextMenu.getItems().addAll(editItem, deleteItem);
+        incomesTable.setContextMenu(contextMenu);
+
+        // Обработчик для вызова меню по правой кнопке мыши
+        incomesTable.setRowFactory(tv -> {
+            TableRow<IncomeDTO> row = new TableRow<>();
+
+            row.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY && !row.isEmpty()) {
+                    incomesTable.getSelectionModel().select(row.getIndex());
+                    contextMenu.show(row, event.getScreenX(), event.getScreenY());
+                }
+            });
+
+            return row;
+        });
     }
 
     private void loadCategories() {
@@ -109,8 +142,11 @@ public class IncomeController {
     private void handleAddIncome() {
         Dialog<IncomeDTO> dialog = new Dialog<>();
         dialog.setTitle("Добавить новый доход");
-
+        setupDialogStyles(dialog);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/add-icon.png")));
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -169,8 +205,11 @@ public class IncomeController {
 
         Dialog<IncomeDTO> dialog = new Dialog<>();
         dialog.setTitle("Редактировать доход");
-
+        setupDialogStyles(dialog);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/add-icon.png")));
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -231,6 +270,10 @@ public class IncomeController {
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Подтверждение удаления");
+        setupDialogStyles(alert);
+        alert.getDialogPane().getStyleClass().add("warning");
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/delete-icon.png")));
         alert.setHeaderText("Вы действительно хотите удалить выбранный доход?");
         alert.setContentText(String.format("Дата: %s\nКатегория: %s\nСумма: %,.2f ₽",
                 selected.transactionDate(),
@@ -307,5 +350,13 @@ public class IncomeController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void setupDialogStyles(Dialog<?> dialog) {
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.getStylesheets().add(
+                getClass().getResource("../resources/styles/style.css").toExternalForm()
+        );
+        dialogPane.getStyleClass().add("dialog-pane");
     }
 }

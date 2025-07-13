@@ -7,23 +7,27 @@ import com.sushkomihail.loan.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class LoanConditionsAnalysisModule {
+    private final VBox analysisContainer;
     private final TextField loanAmountTextField;
     private final TextField loanPeriodTextField;
     private final TextField loanInterestRateTextField;
     private final ChoiceBox<String> loanPaymentTypeChoiceBox;
     private final TextArea loanConditionsAnalysisTextArea;
 
-    public LoanConditionsAnalysisModule(TextField loanAmountTextField,
+    public LoanConditionsAnalysisModule(VBox analysisContainer,
+                                        TextField loanAmountTextField,
                                         TextField loanPeriodTextField,
                                         TextField loanInterestRateTextField,
                                         ChoiceBox<String> loanPaymentTypeChoiceBox,
                                         Button loanConditionsAnalysisButton,
                                         TextArea loanConditionsAnalysisTextArea) {
+        this.analysisContainer = analysisContainer;
         this.loanAmountTextField = loanAmountTextField;
         this.loanPeriodTextField = loanPeriodTextField;
         this.loanInterestRateTextField = loanInterestRateTextField;
@@ -49,6 +53,7 @@ public class LoanConditionsAnalysisModule {
     }
 
     private void performAnalysis() {
+        analysisContainer.setVisible(!analysisContainer.isVisible());
         loanConditionsAnalysisTextArea.setVisible(true);
         PaymentType paymentType = PaymentType.fromString(loanPaymentTypeChoiceBox.getValue());
 
