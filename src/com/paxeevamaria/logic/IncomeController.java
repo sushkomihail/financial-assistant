@@ -4,6 +4,7 @@ import com.kolesnikovroman.CategorySummaryDTO;
 import com.kolesnikovroman.ExpenseDTO;
 import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.IncomeDTO;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -43,10 +44,14 @@ public class IncomeController {
         financialRepository = new FinancialRepository();
 
         // Инициализация столбцов
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("transactionDate"));
-        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
-        amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
-        commentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
+        dateColumn.setCellValueFactory(cellData ->
+                new SimpleObjectProperty<>(cellData.getValue().transactionDate()));
+        categoryColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().categoryName()));
+        amountColumn.setCellValueFactory(cellData ->
+                new SimpleObjectProperty<>(cellData.getValue().amount()));
+        commentColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().comment()));
 
         // Формат отображения суммы
         amountColumn.setCellFactory(tc -> new TableCell<>() {
