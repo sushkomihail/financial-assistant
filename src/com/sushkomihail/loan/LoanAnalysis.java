@@ -1,21 +1,21 @@
 package com.sushkomihail.loan;
 
-public class LoanAnalytics {
+public class LoanAnalysis {
     private static final float MAX_REVENUE_PERCENTAGE_FOR_PAYMENT = 0.4F;
 
     private final Loan loan;
-    private final int revenue;
+    private final float averageIncome;
 
-    public LoanAnalytics(Loan loan, int revenue) {
+    public LoanAnalysis(Loan loan, float averageIncome) {
         this.loan = loan;
-        this.revenue = revenue;
+        this.averageIncome = averageIncome;
     }
 
-    public String generate() {
+    public String perform() {
         String analytics = "Кредитные условия: сумма - " + loan.getAmount() + " руб., срок - " +
                 loan.getPeriod() + " месяц(-а/-ев), годовая ставка - " + loan.getInterestRate() + "%.\n" +
-                "Ваш доход за прошлый месяц составил " + revenue + " руб.\n";
-        double maxPayment = revenue * MAX_REVENUE_PERCENTAGE_FOR_PAYMENT;
+                "Ваш средний доход составляет " + averageIncome + " руб.\n";
+        double maxPayment = averageIncome * MAX_REVENUE_PERCENTAGE_FOR_PAYMENT;
         analytics += "Рекомендуется, чтобы ежемесячный платеж по кредиту не превышал 40% от вашего дохода " +
                 "(в Вашем случае - " + String.format("%.2f", maxPayment) + " руб.)\n" +
                 "Максимальный ежемесячный платеж для данных кредитных условий и типе платежа - '" +
