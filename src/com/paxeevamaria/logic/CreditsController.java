@@ -4,9 +4,11 @@ import com.kolesnikovroman.CreditOfferInitializerService;
 import com.kolesnikovroman.CreditOfferRepository;
 import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.LoanOfferDTO;
+import com.paxeevamaria.logic.modules.credits.LoanConditionsAnalysisModule;
 import com.sushkomihail.llmagent.LlmAgentController;
 import com.sushkomihail.llmagent.requests.LoanOffersRequest;
 import com.sushkomihail.llmagent.requests.MimeType;
+import com.sushkomihail.loan.PaymentType;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,6 +36,14 @@ public class CreditsController {
     @FXML private VBox recommendationBox;
     @FXML private TextArea recommendationText;
 
+    // Для анализа кредитных условий
+    @FXML private TextField loanAmountTextField;
+    @FXML private TextField loanPeriodTextField;
+    @FXML private TextField loanInterestRateTextField;
+    @FXML private ChoiceBox<String> loanPaymentTypeChoiceBox;
+    @FXML private Button loanConditionsAnalysisButton;
+    @FXML private TextArea loanConditionsAnalysisTextArea;
+
     private LlmAgentController llmAgentController;
     private CreditOfferRepository creditOfferRepository;
     private ObservableList<LoanOfferDTO> offersData = FXCollections.observableArrayList();
@@ -52,6 +62,17 @@ public class CreditsController {
         rateColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().rate()));
         termColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().term()));
         totalCostColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().fullLoanCost()));
+
+        // Инициализация модуля анализа кредитных условий
+        loanConditionsAnalysisTextArea.setVisible(false);
+        LoanConditionsAnalysisModule loanConditionsAnalysisModule = new LoanConditionsAnalysisModule(
+                loanAmountTextField,
+                loanPeriodTextField,
+                loanInterestRateTextField,
+                loanPaymentTypeChoiceBox,
+                loanConditionsAnalysisButton,
+                loanConditionsAnalysisTextArea
+        );
 
         loadCreditOffers();
     }

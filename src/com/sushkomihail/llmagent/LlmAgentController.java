@@ -68,6 +68,7 @@ public class LlmAgentController {
      */
     public TransactionsCollection getTransactions(TransactionsCollectionRequest request) {
         CompletionResponse response = getWithFileRequestResponse(request);
+        System.out.println(response);
         TransactionsCollectionResponseHandler responseHandler = new TransactionsCollectionResponseHandler(response);
         return responseHandler.handle();
     }

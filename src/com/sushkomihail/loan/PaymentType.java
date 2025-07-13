@@ -13,4 +13,14 @@ public enum PaymentType {
     public String getTitle() {
         return title;
     }
+
+    public static PaymentType fromString(String title) {
+        for (PaymentType type : PaymentType.values()) {
+            if (type.title.equals(title)) {
+                return type;
+            }
+        }
+
+        return null;
+    }
 }
