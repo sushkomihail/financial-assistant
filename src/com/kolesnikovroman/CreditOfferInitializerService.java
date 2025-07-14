@@ -16,9 +16,10 @@ public class CreditOfferInitializerService {
      * Ключ - имя банка, значение - имя файла в директории, определенной в LoanOfferRequest (res/loanoffers/).
      */
     private static final Map<String, String> BANKS_TO_PROCESS = Map.of(
-//            "СберБанк", "sber.pdf",
+            "СберБанк", "sber.pdf",
             "Альфа-Банк", "alfa.pdf",
-            "ВТБ", "vtb.pdf"
+            "ВТБ", "vtb.pdf",
+            "Совкомбанк", "sovkom.pdf"
     );
 
     private final CreditOfferRepository repository; // Используем новый репозиторий

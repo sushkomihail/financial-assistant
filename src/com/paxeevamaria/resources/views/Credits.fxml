@@ -93,8 +93,8 @@
                 </VBox>
 
                 <VBox styleClass="input-field" spacing="5">
-                    <Label text="Срок кредитования (лет)" styleClass="input-label"/>
-                    <TextField fx:id="loanPeriodTextField" styleClass="styled-text-field" promptText="10 лет"/>
+                    <Label text="Срок кредитования (месяцев)" styleClass="input-label"/>
+                    <TextField fx:id="loanPeriodTextField" styleClass="styled-text-field" promptText="10 месяцев"/>
                 </VBox>
 
                 <VBox styleClass="input-field" spacing="5">

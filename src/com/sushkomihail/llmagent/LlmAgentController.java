@@ -31,7 +31,7 @@ public class LlmAgentController {
         agent.deleteAllFiles();
         agent.clearMessagesHistory();
 
-        UUID fileId = agent.uploadFile(request.getLoanOfferPath(), request.getMimeType().getTitle());
+        UUID fileId = agent.uploadFile(request.getFilePath(), request.getMimeType().getTitle());
         agent.addMessageToHistory(ChatMessageRole.SYSTEM, request.getRequest(),
                 new ArrayList<>(Collections.singletonList(fileId.toString())));
 

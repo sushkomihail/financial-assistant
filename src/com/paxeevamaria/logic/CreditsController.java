@@ -56,6 +56,10 @@ public class CreditsController {
                 creditOfferRepository, llmAgentController);
         initializerService.run();
 
+//        Runnable task = initializerService::run;
+//        Thread thread = new Thread(task);
+//        thread.start();
+
         // Настройка колонок таблицы
         bankColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().bankName()));
         productColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().productName()));
@@ -75,8 +79,6 @@ public class CreditsController {
                 loanConditionsAnalysisButton,
                 loanConditionsAnalysisTextArea
         );
-
-        loadCreditOffers();
     }
 
     private void loadCreditOffers() {
