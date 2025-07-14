@@ -3,33 +3,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             stylesheets="@../styles/style.css"
             fx:controller="com.paxeevamaria.logic.IncomeController">
 
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10">
-        <!-- Строка фильтров -->
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label text="Фильтры:" styleClass="filter-label"/>
-
-            <ComboBox fx:id="categoryComboBox" promptText="Все категории" prefWidth="200"/>
-
-            <DatePicker fx:id="startDatePicker" promptText="С даты"/>
-            <Label text="-"/>
-            <DatePicker fx:id="endDatePicker" promptText="По дату"/>
-
-            <Button text="Применить" onAction="#handleApplyFilters" />
-            <Button text="Сбросить" onAction="#handleResetFilters"/>
-        </HBox>
-
-        <!-- Кнопки управления -->
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <Button text="Добавить" onAction="#handleAddIncome" styleClass="add-button"/>
-            <Button text="Изменить" onAction="#handleEditIncome" styleClass="edit-button"/>
-            <Button text="Удалить" onAction="#handleDeleteIncome" styleClass="delete-button"/>
-        </HBox>
-
         <!-- Сводная информация -->
         <HBox spacing="20" styleClass="summary-box">
             <VBox styleClass="summary-item">
@@ -44,6 +25,43 @@
                 <Label text="Средний доход:" styleClass="summary-label"/>
                 <Label fx:id="averageAmountLabel" text="0.00 ₽" styleClass="summary-value"/>
             </VBox>
+        </HBox>
+
+        <!-- Строка фильтров -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+
+            <ComboBox fx:id="categoryComboBox" promptText="Все категории" prefWidth="200"/>
+
+            <DatePicker fx:id="startDatePicker" promptText="С даты"/>
+            <Label text="-"/>
+            <DatePicker fx:id="endDatePicker" promptText="По дату"/>
+
+            <Button onAction="#handleApplyFilters" styleClass="filter-button">
+                <graphic>
+                    <ImageView>
+                        <Image url="@../images/filter-icon.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+            <Button onAction="#handleResetFilters" styleClass="filter-button">
+                <graphic>
+                    <ImageView>
+                        <Image url="@../images/reset-icon.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+
+            <!-- Заполнитель пространства -->
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Кнопки управления -->
+            <Button onAction="#handleAddIncome" styleClass="add-button">
+                <graphic>
+                    <ImageView>
+                        <Image url="@../images/add-icon.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
         </HBox>
 
         <!-- Таблица доходов -->

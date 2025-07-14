@@ -15,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -29,6 +30,13 @@ public class App extends Application {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Финансовый ассистент");
         this.primaryStage.setMaximized(true);
+
+        try {
+            Image icon = new Image(getClass().getResourceAsStream("resources/images/app-icon.png"));
+            primaryStage.getIcons().add(icon);
+        } catch (Exception e) {
+            System.err.println("Не удалось загрузить иконку приложения: " + e.getMessage());
+        }
 
         initRootLayout();
         showDashboard();

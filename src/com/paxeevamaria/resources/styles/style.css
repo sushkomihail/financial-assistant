@@ -1,97 +1,595 @@
-/* Основные цвета */
+/* Цветовые переменные */
 .root {
-    -fx-base: #f8f8f8;
-    -fx-background: #ffffff;
-    -fx-accent: #4a90e2;
+    -primary-color: #2c3e50;
+    -secondary-color: #A7C4D4;
+    -light-color: #f8f8f8;
+    -hover-color: #AAAAAA;
+    -selected-color: #AAAAAA;
+    -border-color: #e0e0e0;
+    -menu-text-color: white;
+
+    -fx-base: -light-color;
+    -fx-background: white;
+    -fx-accent: -secondary-color;
 }
 
-/* Стили для боковой панели */
-.sidebar {
-    -fx-background-color: #2c3e50;
-    -fx-padding: 10px;
+/* Общие стили */
+.hover-effect:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 1);
+}
+
+/* Боковая панель и меню */
+.sidebar, .menu-bar {
+    -fx-background-color: -primary-color;
+    -fx-text-fill: white;
+}
+
+.menu .label {
+    -fx-text-fill: -selected-color;
+    -fx-font-size: 12px;
+}
+
+.menu-item .label {
+    -fx-text-fill: -primary-color;
+}
+
+.nav-button, .menu {
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
 }
 
 .nav-button {
-    -fx-background-color: transparent;
-    -fx-text-fill: white;
     -fx-font-size: 14px;
-    -fx-alignment: center-left;
     -fx-pref-width: 150px;
+    -fx-alignment: center-left;
 }
 
-.nav-button:hover {
-    -fx-background-color: #34495e;
+.nav-button:hover, .menu-item:hover {
+    -fx-text-fill: -primary-color;
+    -fx-background-color: -hover-color;
     -fx-cursor: hand;
 }
 
-/* Стили для меню */
-.menu-bar {
-    -fx-background-color: #2c3e50;
+/* MainUI */
+.dashboard-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 2, 2);
+    -fx-padding: 15;
+    -fx-spacing: 10;
 }
 
-.menu-bar .menu {
-    -fx-text-fill: white;
+.card-header {
+    -fx-font-size: 18px;
+    -fx-text-fill: -primary-color;
+    -fx-padding: 0 0 10px 0;
 }
 
-.menu-bar .menu-item {
-    -fx-text-fill: #2c3e50;
+/* Общие стили для всех графиков */
+.chart {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
 }
 
-
-// ---- credits ------
-.credits-container {
-    -fx-padding: 10px;
-    -fx-spacing: 10px;
+/* Стили для легенды графиков */
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
 }
 
-.scroll-pane {
-    -fx-fit-to-width: true;
-    -fx-fit-to-height: true;
+.chart-legend-item-symbol {
+    -fx-background-radius: 3;
 }
 
-.scroll-pane .viewport {
+.chart-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #555;
+}
+
+/* Стили для осей */
+.axis {
+    -fx-tick-label-fill: #666;
+    -fx-font-size: 12px;
+}
+
+.axis-label {
+    -fx-text-fill: #555;
+    -fx-font-size: 13px;
+}
+
+/* Стили для PieChart */
+.chart-pie-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* Установка цветов для каждого сектора по порядку */
+.default-color0.chart-pie { -fx-pie-color: #5AB1E5; } /* 1-й сектор */
+.default-color1.chart-pie { -fx-pie-color: #2f89f7; } /* 2-й сектор */
+.default-color2.chart-pie { -fx-pie-color: #e35050; } /* 3-й сектор */
+.default-color3.chart-pie { -fx-pie-color: #A7C4D4; } /* 4-й сектор */
+.default-color4.chart-pie { -fx-pie-color: #9013fe; } /* 5-й сектор */
+.default-color5.chart-pie { -fx-pie-color: #7ed321; } /* 6-й сектор */
+.default-color6.chart-pie { -fx-pie-color: #bd10e0; } /* 7-й сектор */
+.default-color7.chart-pie { -fx-pie-color: #8b572a; } /* 8-й сектор */
+
+/* Стили для BarChart */
+.default-color0.chart-bar {
+    -fx-bar-fill: #5AB1E5; /* Синий для доходов */
+}
+
+.default-color1.chart-bar {
+    -fx-bar-fill: #e35050; /* Красный для расходов */
+}
+
+/* Стили для LineChart */
+.chart-series-line {
+    -fx-stroke: #4a90e2;
+    -fx-stroke-width: 2px;
+}
+
+.chart-line-symbol {
+    -fx-background-color: #4a90e2, white;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px;
+}
+
+/* Стили для индикаторов загрузки */
+.progress-indicator {
+    -fx-progress-color: -primary-color;
+}
+
+.progress-indicator:indeterminate > .spinner {
     -fx-background-color: transparent;
 }
 
-/* Стили для таблицы */
-.income-table, .expense-table {
-    -fx-font-size: 14px;
-    -fx-padding: 10px;
+.text-field, .combo-box, .date-picker {
     -fx-background-color: white;
-    -fx-border-color: #e0e0e0;
-    -fx-border-width: 1px;
+    -fx-border-color: -border-color;
+    -fx-border-radius: 4;
+    -fx-padding: 6 10;
+    -fx-font-size: 14px;
 }
 
-.table-view .column-header {
-    -fx-background-color: #4a90e2;
+.text-field:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: -secondary-color;
+    -fx-effect: dropshadow(three-pass-box, rgba(74,144,226,0.2), 5, 0, 0, 1);
+}
+
+.transition-effect {
+    -fx-transition: all 0.3s ease;
+}
+
+.hover-scale-effect:hover {
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-scale-z: 1.02;
+}
+
+/* Expense */
+
+/* Стили для формы расходов */
+
+/* Стили для кнопок управления */
+.add-button {
+    -fx-background-color: transparent;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-font-size: 14px;
+    -fx-padding: 8 16;
+    -fx-background-radius: 4;
 }
 
-.table-view .table-row-cell {
-    -fx-cell-size: 40px;
+.add-button .image-view {
+    -fx-fit-height: 16px;
+    -fx-fit-width: 16px;
 }
 
-.table-view .table-row-cell:odd {
-    -fx-background-color: #f9f9f9;
-}
-
-.table-view .table-row-cell:selected {
-    -fx-background-color: #E3F2FD;
-    -fx-text-background-color: #1976D2;
+.add-button:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
 }
 
 /* Стили для сводной информации */
 .summary-box {
-    -fx-background-color: #E3F2FD;
-    -fx-border-color: #BBDEFB;
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-padding: 14px;
+    -fx-spacing: 14px;
+}
+
+.summary-item {
+    -fx-spacing: 5px;
+}
+
+.summary-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #666;
+}
+
+.summary-value {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -primary-color;
+}
+
+/* Стили для таблицы расходов */
+.expense-table, .income-table, .credits-table {
+    -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.expense-table .column-header-background, .income-table .column-header-background,
+ .credits-table .column-header-background {
+    -fx-background-color: -secondary-color;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.expense-table .column-header, .income-table .column-header, .credits-table .column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10px;
+}
+
+.expense-table .table-cell, .income-table .table-cell, .credits-table .table-cell {
+    -fx-padding: 10px;
+    -fx-border-color: transparent;
+}
+
+.expense-table .table-row-cell:odd, .income-table .table-row-cell:odd,
+.credits-table .table-row-cell:odd {
+    -fx-background-color: #f9f9f9;
+}
+
+.expense-table .table-row-cell:selected, .income-table .table-row-cell:selected,
+.credits-table .table-row-cell:selected{
+    -fx-background-color: #e3f2fd;
+    -fx-text-background-color: -primary-color;
+}
+
+/* Стили для выпадающих списков и полей ввода */
+.combo-box, .date-picker {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 6px 10px;
+    -fx-font-size: 14px;
+}
+
+.combo-box .list-cell {
+    -fx-padding: 6px 10px;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #f5f5f5;
+}
+
+/* Стили для кнопок фильтров */
+.filter-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333;
+    -fx-font-size: 14px;
+    -fx-padding: 4px 4px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.filter-button:hover {
+    -fx-background-color: #d0d0d0;
+}
+
+/* Анимации */
+.transition-effect {
+    -fx-transition: all 0.3s ease;
+}
+
+/* Эффект при наведении на строки таблицы */
+.expense-table .table-row-cell:hover, .income-table .table-row-cell:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+/* Стиль для нечетных строк таблицы */
+.expense-table .table-row-cell:odd:hover, .income-table .table-row-cell:odd:hover  {
+    -fx-background-color: #f0f0f0;
+}
+
+/* Стиль для выбранной строки таблицы */
+.expense-table .table-row-cell:selected:hover, .income-table .table-row-cell:selected:hover {
+    -fx-background-color: #d9edf7;
+}
+
+
+
+/* Специфичные стили для кредитного раздела */
+.credits-scroll-pane {
+    -fx-background: white;
+    -fx-border-color: transparent;
+    -fx-fit-to-width: true;
+}
+
+.actual-date-label {
+    -fx-text-fill: #666;
+    -fx-font-style: italic;
+    -fx-font-size: 12px;
+}
+
+/* Стили для блока рекомендаций и результатов анализа кредита*/
+.recommendation-box, .loan-analysis-box {
+    -fx-background-color: #f5f9ff;
+    -fx-border-color: #d0e3ff;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-padding: 15px;
+}
+
+.recommendation-header, .analysis-header {
+    -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+.recommendation-text, .analysis-text {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333;
+    -fx-font-size: 14px;
+    -fx-border-color: #d0e3ff;
     -fx-border-width: 1px;
     -fx-border-radius: 4px;
     -fx-padding: 10px;
 }
 
-/* Эффекты при наведении */
-.button:hover, .combo-box:hover, .date-picker:hover {
+/* Стили для секции анализа кредитных условий */
+.loan-analysis-section {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-padding: 15px;
+    -fx-spacing: 10px;
+}
+
+.loan-analysis-section Label {
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.loan-analysis-section TextField,
+.loan-analysis-section ChoiceBox {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 6px 10px;
+    -fx-font-size: 14px;
+}
+
+.loan-analysis-section TextArea {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+}
+
+/* Стили для кнопок */
+.action-button {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 4px 8px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3, 0, 0, 1);
+}
+
+.action-button:hover {
+    -fx-background-color: #3d566e;
+}
+
+.action-button:pressed {
+    -fx-background-color: #1a2632;
+}
+
+/* Анимации для плавного появления */
+.fade-in {
+    -fx-opacity: 0;
+    -fx-transition: opacity 0.3s ease;
+}
+
+.fade-in.show {
+    -fx-opacity: 1;
+}
+
+/* Эффект при наведении на элементы */
+.hover-effect:hover {
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 1);
+    -fx-cursor: hand;
+}
+
+/* Стиль для неактивных элементов */
+.disabled-style {
+    -fx-opacity: 0.6;
+    -fx-cursor: default;
+}
+
+/* Стили для заголовков секций */
+.section-header {
+    -fx-font-size: 20px;
+    -fx-text-fill: -primary-color;
+    -fx-padding: 0 0 10px 0;
+}
+
+/* Стили для контейнера анализа */
+.loan-analysis-container {
+    -fx-background-color: #ffffff;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 0;
+    -fx-padding: 20px;
+    -fx-background-radius: 0;
+}
+
+/* Контейнер для полей ввода */
+.input-fields-container {
+    -fx-padding: 0 0 15px 0;
+}
+
+/* Стили для полей ввода */
+.input-field {
+    -fx-spacing: 5px;
+}
+
+.input-label {
+    -fx-text-fill: #555555;
+    -fx-font-size: 14px;
+}
+
+.styled-text-field {
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #d0d0d0;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+    -fx-pref-width: 120px;
+    -fx-pref-height: 30px;
+}
+
+.styled-text-field:focused {
+    -fx-border-color: #5AB1E5;
+}
+
+.styled-choice-box {
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #d0d0d0;
+    -fx-border-radius: 4px;
+    -fx-padding: 2px 6px;
+    -fx-font-size: 14px;
+    -fx-pref-height: 30px;
+}
+
+/* Стиль области с результатами анализа */
+.analysis-result {
+    -fx-background-color: #f5f9ff;
+    -fx-border-color: #d0e3ff;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-padding: 15px;
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+/* Анимация появления результатов */
+.analysis-result:shown {
+    -fx-opacity: 0;
+    -fx-translate-y: 10;
+    -fx-transition: all 0.3s ease;
+}
+
+.analysis-result:shown:visible {
+    -fx-opacity: 1;
+    -fx-translate-y: 0;
+}
+
+
+
+
+/* Стили для Alert и Dialog */
+.dialog-pane {
+    -fx-background-color: -secondary-color;
+    -fx-border-color: -secondary-color;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);
+}
+
+.dialog-pane > .button-bar > .container {
+    -fx-background-color: -secondary-color;
+    -fx-padding: 10px;
+}
+
+.dialog-pane > .content.label {
+    -fx-padding: 10px 15px;
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: white;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.dialog-pane .button {
+    -fx-background-color: white;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.dialog-pane .button:hover {
+    -fx-background-color: #3d566e;
+}
+
+.dialog-pane .button:default {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: white;
+}
+
+.dialog-pane .button:cancel {
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #333333;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+}
+
+/* Специальные стили для диалога удаления */
+.alert.dialog-pane:warning .header-panel {
+    -fx-background-color: -secondary-color;
+}
+
+.alert.dialog-pane:warning .button:default {
+    -fx-background-color: -secondary-color;
+}
+
+.alert.dialog-pane:warning .button:default:hover {
+    -fx-background-color: -secondary-color;
+}
+
+/* Стили для полей ввода в диалогах */
+.dialog-pane .text-field,
+.dialog-pane .combo-box,
+.dialog-pane .date-picker {
+    -fx-background-color: -white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+}
+
+.dialog-pane .text-area {
+    -fx-background-color: -secondary-color;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px;
+    -fx-font-size: 14px;
 }

@@ -37,6 +37,7 @@ public class CreditsController {
     @FXML private TextArea recommendationText;
 
     // Для анализа кредитных условий
+    @FXML private VBox loanConditionsAnalysisBox;
     @FXML private TextField loanAmountTextField;
     @FXML private TextField loanPeriodTextField;
     @FXML private TextField loanInterestRateTextField;
@@ -66,6 +67,7 @@ public class CreditsController {
         // Инициализация модуля анализа кредитных условий
         loanConditionsAnalysisTextArea.setVisible(false);
         LoanConditionsAnalysisModule loanConditionsAnalysisModule = new LoanConditionsAnalysisModule(
+                loanConditionsAnalysisBox,
                 loanAmountTextField,
                 loanPeriodTextField,
                 loanInterestRateTextField,

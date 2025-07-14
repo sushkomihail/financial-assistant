@@ -11,8 +11,11 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -76,6 +79,36 @@ public class ExpenseController {
         );
         loadCategories();
         loadExpenses();
+
+        createContextMenu();
+    }
+
+    // Создание контекстного меню
+    private void createContextMenu() {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem editItem = new MenuItem("Изменить");
+        MenuItem deleteItem = new MenuItem("Удалить");
+
+        editItem.setOnAction(event -> handleEditExpense());
+        deleteItem.setOnAction(event -> handleDeleteExpense());
+
+        contextMenu.getItems().addAll(editItem, deleteItem);
+        expensesTable.setContextMenu(contextMenu);
+
+        // Обработчик для вызова меню по правой кнопке мыши
+        expensesTable.setRowFactory(tv -> {
+            TableRow<ExpenseDTO> row = new TableRow<>();
+
+            row.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY && !row.isEmpty()) {
+                    expensesTable.getSelectionModel().select(row.getIndex());
+                    contextMenu.show(row, event.getScreenX(), event.getScreenY());
+                }
+            });
+
+            return row;
+        });
     }
 
     private void loadCategories() {
@@ -109,7 +142,11 @@ public class ExpenseController {
             // Диалог для добавления нового расхода
             Dialog<ExpenseDTO> dialog = new Dialog<>();
             dialog.setTitle("Добавить новый расход");
+            setupDialogStyles(dialog);
             dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+            Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/add-icon.png")));
 
             // Создание формы
             GridPane grid = new GridPane();
@@ -175,8 +212,11 @@ public class ExpenseController {
         try {
             Dialog<ExpenseDTO> dialog = new Dialog<>();
             dialog.setTitle("Редактировать расход");
-
+            setupDialogStyles(dialog);
             dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+            Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/add-icon.png")));
 
             GridPane grid = new GridPane();
             grid.setHgap(10);
@@ -241,6 +281,10 @@ public class ExpenseController {
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Подтверждение удаления");
+        setupDialogStyles(alert);
+        alert.getDialogPane().getStyleClass().add("warning");
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/delete-icon.png")));
         alert.setHeaderText("Вы действительно хотите удалить выбранный расход?");
         alert.setContentText(String.format("Дата: %s\nКатегория: %s\nСумма: %,.2f ₽",
                 selected.transactionDate(),
@@ -311,5 +355,13 @@ public class ExpenseController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void setupDialogStyles(Dialog<?> dialog) {
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.getStylesheets().add(
+                getClass().getResource("../resources/styles/style.css").toExternalForm()
+        );
+        dialogPane.getStyleClass().add("dialog-pane");
     }
 }
