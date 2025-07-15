@@ -2,29 +2,25 @@ package com.paxeevamaria.logic;
 
 import com.kolesnikovroman.CreditOfferInitializerService;
 import com.kolesnikovroman.CreditOfferRepository;
-import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.LoanOfferDTO;
+import com.kolesnikovroman.UserDTO;
 import com.paxeevamaria.logic.modules.credits.LoanConditionsAnalysisModule;
 import com.sushkomihail.llmagent.LlmAgentController;
 import com.sushkomihail.llmagent.requests.LoanOffersRequest;
 import com.sushkomihail.llmagent.requests.MimeType;
-import com.sushkomihail.loan.PaymentType;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.List;
 
 public class CreditsController {
-
     @FXML private TableView<LoanOfferDTO> creditsTable;
     @FXML private TableColumn<LoanOfferDTO, String> bankColumn;
     @FXML private TableColumn<LoanOfferDTO, String> productColumn;
@@ -45,11 +41,13 @@ public class CreditsController {
     @FXML private Button loanConditionsAnalysisButton;
     @FXML private TextArea loanConditionsAnalysisTextArea;
 
+    UserDTO user;
     private LlmAgentController llmAgentController;
     private CreditOfferRepository creditOfferRepository;
-    private ObservableList<LoanOfferDTO> offersData = FXCollections.observableArrayList();
+    private final ObservableList<LoanOfferDTO> offersData = FXCollections.observableArrayList();
 
-    public void initialize(LlmAgentController llmAgentController) {
+    public void initialize(LlmAgentController llmAgentController, UserDTO user) {
+        this.user = user;
         this.llmAgentController = llmAgentController;
         this.creditOfferRepository = new CreditOfferRepository();
         CreditOfferInitializerService initializerService = new CreditOfferInitializerService(
@@ -70,14 +68,15 @@ public class CreditsController {
 
         // Инициализация модуля анализа кредитных условий
         loanConditionsAnalysisTextArea.setVisible(false);
-        LoanConditionsAnalysisModule loanConditionsAnalysisModule = new LoanConditionsAnalysisModule(
+        new LoanConditionsAnalysisModule(
                 loanConditionsAnalysisBox,
                 loanAmountTextField,
                 loanPeriodTextField,
                 loanInterestRateTextField,
                 loanPaymentTypeChoiceBox,
                 loanConditionsAnalysisButton,
-                loanConditionsAnalysisTextArea
+                loanConditionsAnalysisTextArea,
+                user.id()
         );
     }
 

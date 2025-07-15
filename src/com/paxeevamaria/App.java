@@ -2,15 +2,16 @@ package com.paxeevamaria;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 
+import com.kolesnikovroman.UserDTO;
 import com.paxeevamaria.logic.*;
 import com.sushkomihail.llmagent.GigaChatAgent;
 import com.sushkomihail.llmagent.LlmAgentController;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -24,6 +25,8 @@ import javafx.stage.Stage;
 public class App extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
+    private RootController rootController;
+    private LoginController loginController;
     private LlmAgentController llmAgentController;
 
     @Override
@@ -33,24 +36,49 @@ public class App extends Application {
         this.primaryStage.setMaximized(true);
 
         try {
-            Image icon = new Image(getClass().getResourceAsStream("resources/images/app-icon.png"));
+            Image icon = new Image(Objects.requireNonNull(
+                    getClass().getResourceAsStream("resources/images/app-icon.png")));
             primaryStage.getIcons().add(icon);
         } catch (Exception e) {
             System.err.println("Не удалось загрузить иконку приложения: " + e.getMessage());
         }
 
-        initRootLayout();
-        showDashboard();
+        showRootLayout();
+        showLoginPane();
     }
 
-    private void initRootLayout() {
+    public LoginController getLoginController() {
+        return loginController;
+    }
+
+    public UserDTO getUser() {
+        return loginController.getCurrentLoginModule().getMethod().getUser();
+    }
+
+    public void showLoginPane() {
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(App.class.getResource("./resources/views/root.fxml"));
+            loader.setLocation(App.class.getResource("./resources/views/Login.fxml"));
+            AnchorPane loginPane = loader.load();
+
+            rootLayout.setCenter(loginPane);
+
+            loginController = loader.getController();
+            loginController.initialize();
+            loginController.addLoginObserver(rootController);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showRootLayout() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(App.class.getResource("./resources/views/Root.fxml"));
             rootLayout = loader.load();
 
-            RootController controller = loader.getController();
-            controller.setMainApp(this);
+            rootController = loader.getController();
+            rootController.initialize(this);
 
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
@@ -65,8 +93,10 @@ public class App extends Application {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(App.class.getResource("./resources/views/MainUI.fxml"));
             AnchorPane dashboard = loader.load();
+
             rootLayout.setCenter(dashboard);
             MainUIController controller = loader.getController();
+            controller.setUser(getUser());
 
             initGigaChat();
             controller.setMainPanel(llmAgentController);
@@ -98,7 +128,7 @@ public class App extends Application {
             rootLayout.setCenter(incomePanel);
 
             IncomeController controller = loader.getController();
-            controller.initialize();
+            controller.initialize(getUser());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -113,8 +143,7 @@ public class App extends Application {
             rootLayout.setCenter(expensePanel);
 
             ExpenseController controller = loader.getController();
-            controller.initialize();
-
+            controller.initialize(getUser());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -129,7 +158,7 @@ public class App extends Application {
             rootLayout.setCenter(creditsPanel);
 
             CreditsController controller = loader.getController();
-            controller.initialize(this.llmAgentController);
+            controller.initialize(this.llmAgentController, getUser());
         } catch (IOException e) {
             e.printStackTrace();
         }

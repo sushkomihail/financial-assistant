@@ -1,4 +1,3 @@
-// Файл: src/main/java/com/kolesnikovroman/FinancialRepository.java
 package com.kolesnikovroman;
 
 import java.math.BigDecimal;
@@ -12,16 +11,7 @@ import java.util.Optional;
  * Репозиторий для управления финансовыми данными в базе данных.
  * Предоставляет полный набор CRUD-операций и методов для получения сводных отчетов.
  */
-public class FinancialRepository {
-
-    private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/FinanceDataBase";
-    private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "12345";
-
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD);
-    }
-
+public final class FinancialRepository extends DataBaseRepository {
     // =========================================================================
     // ==== CRUD Operations for Expenses ====
     // =========================================================================
@@ -36,23 +26,29 @@ public class FinancialRepository {
      * @throws IllegalArgumentException если указанная категория не найдена.
      */
     public ExpenseDTO addExpense(ExpenseDTO expense) throws SQLException {
-        final String sql = "INSERT INTO expenses (amount, transaction_date, comment, category_id) VALUES (?, ?, ?, ?) RETURNING id, transaction_date;";
+        final String sql = "INSERT INTO expenses (amount, transaction_date, comment, category_id, user_id) " +
+                "VALUES (?, ?, ?, ?, ?) RETURNING id, transaction_date";
 
         try (Connection connection = getConnection()) {
-            long categoryId = getCategoryIdByName(connection, "expense_categories", expense.categoryName())
-                    .orElseThrow(() -> new IllegalArgumentException("Категория расходов '" + expense.categoryName() + "' не найдена."));
+            long categoryId =
+                    getCategoryIdByName(connection, "expense_categories", expense.categoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория расходов '" +
+                            expense.categoryName() + "' не найдена."));
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setBigDecimal(1, expense.amount());
                 statement.setDate(2, Date.valueOf(expense.transactionDate()));
                 statement.setString(3, expense.comment());
                 statement.setLong(4, categoryId);
+                statement.setInt(5, expense.userId());
 
                 try (ResultSet rs = statement.executeQuery()) {
                     if (rs.next()) {
                         long newId = rs.getLong("id");
                         LocalDate newDate = rs.getDate("transaction_date").toLocalDate();
-                        return new ExpenseDTO(newId, expense.amount(), newDate, expense.comment(), expense.categoryName());
+                        return new ExpenseDTO(
+                                newId, expense.amount(), newDate, expense.comment(), expense.categoryName(),
+                                expense.userId());
                     } else {
                         throw new SQLException("Не удалось создать запись о расходе, ID не был получен.");
                     }
@@ -80,7 +76,7 @@ public class FinancialRepository {
                 statement.setDate(2, Date.valueOf(expense.transactionDate()));
                 statement.setString(3, expense.comment());
                 statement.setLong(4, categoryId);
-                statement.setLong(5, expense.id());
+                statement.setLong(5, expense.userId());
 
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows == 0) {
@@ -120,23 +116,29 @@ public class FinancialRepository {
      * Добавляет новую запись о доходе в базу данных.
      */
     public IncomeDTO addIncome(IncomeDTO income) throws SQLException {
-        final String sql = "INSERT INTO incomes (amount, transaction_date, comment, category_id) VALUES (?, ?, ?, ?) RETURNING id, transaction_date;";
+        final String sql = "INSERT INTO incomes (amount, transaction_date, comment, category_id, user_id) " +
+                "VALUES (?, ?, ?, ?, ?) RETURNING id, transaction_date;";
 
         try (Connection connection = getConnection()) {
-            long categoryId = getCategoryIdByName(connection, "income_categories", income.categoryName())
-                    .orElseThrow(() -> new IllegalArgumentException("Категория доходов '" + income.categoryName() + "' не найдена."));
+            long categoryId =
+                    getCategoryIdByName(connection, "income_categories", income.categoryName())
+                    .orElseThrow(() -> new IllegalArgumentException("Категория доходов '" +
+                            income.categoryName() + "' не найдена."));
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setBigDecimal(1, income.amount());
                 statement.setDate(2, Date.valueOf(income.transactionDate()));
                 statement.setString(3, income.comment());
                 statement.setLong(4, categoryId);
+                statement.setInt(5, income.userId());
 
                 try (ResultSet rs = statement.executeQuery()) {
                     if (rs.next()) {
                         long newId = rs.getLong("id");
                         LocalDate newDate = rs.getDate("transaction_date").toLocalDate();
-                        return new IncomeDTO(newId, income.amount(), newDate, income.comment(), income.categoryName());
+                        return new IncomeDTO(
+                                newId, income.amount(), newDate, income.comment(), income.categoryName(),
+                                income.userId());
                     } else {
                         throw new SQLException("Не удалось создать запись о доходе, ID не был получен.");
                     }
@@ -160,7 +162,7 @@ public class FinancialRepository {
                 statement.setDate(2, Date.valueOf(income.transactionDate()));
                 statement.setString(3, income.comment());
                 statement.setLong(4, categoryId);
-                statement.setLong(5, income.id());
+                statement.setLong(5, income.userId());
 
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows == 0) {
@@ -226,16 +228,17 @@ public class FinancialRepository {
     // ==== Read-Only, Summary & Aggregate Operations ====
     // =========================================================================
 
-    public List<ExpenseDTO> findAllExpenses() throws SQLException {
+    public List<ExpenseDTO> findAllExpenses(int userId) throws SQLException {
         List<ExpenseDTO> expenses = new ArrayList<>();
-        final String sql = "SELECT e.id, e.amount, e.transaction_date, e.comment, ec.name AS category_name " +
-                "FROM expenses e " +
-                "JOIN expense_categories ec ON e.category_id = ec.id " +
+        final String sql = "SELECT e.id, e.amount, e.transaction_date, e.comment, ec.name AS category_name, " +
+                "e.user_id FROM expenses e " +
+                "JOIN expense_categories ec ON e.category_id = ec.id AND e.user_id = ? " +
                 "ORDER BY e.transaction_date DESC, e.id DESC;";
 
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 expenses.add(new ExpenseDTO(
@@ -243,23 +246,25 @@ public class FinancialRepository {
                         resultSet.getBigDecimal("amount"),
                         resultSet.getDate("transaction_date").toLocalDate(),
                         resultSet.getString("comment"),
-                        resultSet.getString("category_name")
+                        resultSet.getString("category_name"),
+                        resultSet.getInt("user_id")
                 ));
             }
         }
         return expenses;
     }
 
-    public List<IncomeDTO> findAllIncomes() throws SQLException {
+    public List<IncomeDTO> findAllIncomes(int userId) throws SQLException {
         List<IncomeDTO> incomes = new ArrayList<>();
-        final String sql = "SELECT i.id, i.amount, i.transaction_date, i.comment, ic.name AS category_name " +
-                "FROM incomes i " +
-                "JOIN income_categories ic ON i.category_id = ic.id " +
+        final String sql = "SELECT i.id, i.amount, i.transaction_date, i.comment, ic.name AS category_name, " +
+                "i.user_id FROM incomes i " +
+                "JOIN income_categories ic ON i.category_id = ic.id AND i.user_id = ? " +
                 "ORDER BY i.transaction_date DESC, i.id DESC;";
 
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 incomes.add(new IncomeDTO(
@@ -267,20 +272,22 @@ public class FinancialRepository {
                         resultSet.getBigDecimal("amount"),
                         resultSet.getDate("transaction_date").toLocalDate(),
                         resultSet.getString("comment"),
-                        resultSet.getString("category_name")
+                        resultSet.getString("category_name"),
+                        resultSet.getInt("user_id")
                 ));
             }
         }
         return incomes;
     }
 
-    public List<CategorySummaryDTO> getLastMonthSummary() throws SQLException {
+    public List<CategorySummaryDTO> getLastMonthSummary(int userId) throws SQLException {
         List<CategorySummaryDTO> summaries = new ArrayList<>();
-        String sql = "SELECT * FROM get_last_month_summary_by_category();";
+        String sql = "SELECT * FROM get_last_month_summary_by_category(?)";
 
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 String category = resultSet.getString("Категория");
@@ -288,76 +295,18 @@ public class FinancialRepository {
                 summaries.add(new CategorySummaryDTO(category, totalAmount));
             }
         }
+
         return summaries;
     }
 
-    public List<ExpenseDTO> findExpensesByCategoryName(String categoryName) throws SQLException {
-        List<ExpenseDTO> expenses = new ArrayList<>();
-        String sql = "SELECT e.id, e.amount, e.transaction_date, e.comment, ec.name AS category_name " +
-                "FROM expenses e " +
-                "JOIN expense_categories ec ON e.category_id = ec.id " +
-                "WHERE ec.name = ?";
-
-        try (Connection connection = getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-            preparedStatement.setString(1, categoryName);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    long id = resultSet.getLong("id");
-                    BigDecimal amount = resultSet.getBigDecimal("amount");
-                    LocalDate date = resultSet.getDate("transaction_date").toLocalDate();
-                    String comment = resultSet.getString("comment");
-                    String catName = resultSet.getString("category_name");
-
-                    expenses.add(new ExpenseDTO(id, amount, date, comment, catName));
-                }
-            }
-        }
-        return expenses;
-    }
-
-    public List<CategorySummaryDTO> getCurrentMonthIncomeSummary() throws SQLException {
-        List<CategorySummaryDTO> summaries = new ArrayList<>();
-        String sql = "SELECT * FROM get_current_month_income_summary_by_category();";
-
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
-
-            while (resultSet.next()) {
-                String category = resultSet.getString("category_name");
-                BigDecimal totalAmount = resultSet.getBigDecimal("total_amount");
-                summaries.add(new CategorySummaryDTO(category, totalAmount));
-            }
-        }
-        return summaries;
-    }
-
-    public List<CategorySummaryDTO> getLastMonthIncomeSummary() throws SQLException {
-        List<CategorySummaryDTO> summaries = new ArrayList<>();
-        String sql = "SELECT * FROM get_last_month_income_summary_by_category();";
-
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
-
-            while (resultSet.next()) {
-                String category = resultSet.getString("category_name");
-                BigDecimal totalAmount = resultSet.getBigDecimal("total_amount");
-                summaries.add(new CategorySummaryDTO(category, totalAmount));
-            }
-        }
-        return summaries;
-    }
-
-    public List<MonthlyFinancialSummaryDTO> getMonthlyFinancialSummary() throws SQLException {
+    public List<MonthlyFinancialSummaryDTO> getMonthlyFinancialSummary(int userId) throws SQLException {
         List<MonthlyFinancialSummaryDTO> summaryList = new ArrayList<>();
-        String sql = "SELECT * FROM get_full_monthly_summary();";
+        String sql = "SELECT * FROM get_full_monthly_summary(?)";
 
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, userId);
+            ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 LocalDate month = resultSet.getDate("month_date").toLocalDate();
@@ -368,30 +317,8 @@ public class FinancialRepository {
                 summaryList.add(new MonthlyFinancialSummaryDTO(month, income, expense, profit));
             }
         }
+
         return summaryList;
-    }
-
-    // Примечание: предполагаю, что класс LoanOfferDTO существует в вашем проекте.
-    public List<LoanOfferDTO> findAllCreditOffers() throws SQLException {
-        List<LoanOfferDTO> offers = new ArrayList<>();
-        String sql = "SELECT bank_name, product_name, amount, rate, term, total_cost FROM credit_offers ORDER BY bank_name;";
-
-        try (Connection connection = getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
-
-            while (resultSet.next()) {
-                String bankName = resultSet.getString("bank_name");
-                String productName = resultSet.getString("product_name");
-                String amount = resultSet.getString("amount");
-                String rate = resultSet.getString("rate");
-                String term = resultSet.getString("term");
-                String totalCost = resultSet.getString("total_cost");
-
-                offers.add(new LoanOfferDTO(bankName, productName, amount, rate, term, totalCost));
-            }
-        }
-        return offers;
     }
 
     // =========================================================================

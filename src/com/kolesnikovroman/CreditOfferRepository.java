@@ -6,15 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CreditOfferRepository {
-    private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/FinanceDataBase";
-    private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "12345";
-
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD);
-    }
-
+public final class CreditOfferRepository extends DataBaseRepository {
     /**
      * Возвращает множество уникальных имен банков, кредитные предложения которых уже есть в БД.
      * @return Set с именами существующих банков.

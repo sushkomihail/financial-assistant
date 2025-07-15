@@ -1,16 +1,14 @@
 package com.paxeevamaria.logic;
 
-import com.kolesnikovroman.CategorySummaryDTO;
-import com.kolesnikovroman.ExpenseDTO;
 import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.IncomeDTO;
+import com.kolesnikovroman.UserDTO;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
@@ -22,8 +20,8 @@ import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class IncomeController {
     @FXML private ComboBox<String> categoryComboBox;
@@ -38,12 +36,14 @@ public class IncomeController {
     @FXML private TableColumn<IncomeDTO, BigDecimal> amountColumn;
     @FXML private TableColumn<IncomeDTO, String> commentColumn;
 
+    private UserDTO user;
     private FinancialRepository financialRepository;
-    private ObservableList<IncomeDTO> allIncomes = FXCollections.observableArrayList();
-    private ObservableList<String> allCategories = FXCollections.observableArrayList();
+    private final ObservableList<IncomeDTO> allIncomes = FXCollections.observableArrayList();
+    private final ObservableList<String> allCategories = FXCollections.observableArrayList();
 
     @FXML
-    public void initialize() {
+    public void initialize(UserDTO user) {
+        this.user = user;
         financialRepository = new FinancialRepository();
 
         // Инициализация столбцов
@@ -129,7 +129,7 @@ public class IncomeController {
 
     private void loadIncomes() {
         try {
-            List<IncomeDTO> incomes = financialRepository.findAllIncomes();
+            List<IncomeDTO> incomes = financialRepository.findAllIncomes(user.id());
             allIncomes.setAll(incomes);
             incomesTable.setItems(allIncomes);
             updateSummary();
@@ -146,7 +146,8 @@ public class IncomeController {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/add-icon.png")));
+        stage.getIcons().add(new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream("../resources/images/add-icon.png"))));
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -174,7 +175,7 @@ public class IncomeController {
                 try {
                     BigDecimal amount = new BigDecimal(amountField.getText());
                     return new IncomeDTO(0, amount, datePicker.getValue(),
-                            commentArea.getText(), categoryCombo.getValue());
+                            commentArea.getText(), categoryCombo.getValue(), user.id());
                 } catch (NumberFormatException e) {
                     showError("Ошибка", "Некорректная сумма");
                     return null;
@@ -209,7 +210,8 @@ public class IncomeController {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/add-icon.png")));
+        stage.getIcons().add(new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream("../resources/images/add-icon.png"))));
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -238,7 +240,7 @@ public class IncomeController {
                 try {
                     BigDecimal amount = new BigDecimal(amountField.getText());
                     return new IncomeDTO(selected.id(), amount, datePicker.getValue(),
-                            commentArea.getText(), categoryCombo.getValue());
+                            commentArea.getText(), categoryCombo.getValue(), user.id());
                 } catch (NumberFormatException e) {
                     showError("Ошибка", "Некорректная сумма");
                     return null;
@@ -273,7 +275,8 @@ public class IncomeController {
         setupDialogStyles(alert);
         alert.getDialogPane().getStyleClass().add("warning");
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/delete-icon.png")));
+        stage.getIcons().add(new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream("../resources/images/delete-icon.png"))));
         alert.setHeaderText("Вы действительно хотите удалить выбранный доход?");
         alert.setContentText(String.format("Дата: %s\nКатегория: %s\nСумма: %,.2f ₽",
                 selected.transactionDate(),
@@ -307,11 +310,8 @@ public class IncomeController {
             if (startDate != null && income.transactionDate().isBefore(startDate)) {
                 return false;
             }
-            if (endDate != null && income.transactionDate().isAfter(endDate)) {
-                return false;
-            }
 
-            return true;
+            return endDate == null || !income.transactionDate().isAfter(endDate);
         });
 
         incomesTable.setItems(filtered);
@@ -354,9 +354,8 @@ public class IncomeController {
 
     private void setupDialogStyles(Dialog<?> dialog) {
         DialogPane dialogPane = dialog.getDialogPane();
-        dialogPane.getStylesheets().add(
-                getClass().getResource("../resources/styles/style.css").toExternalForm()
-        );
+        dialogPane.getStylesheets().add(Objects.requireNonNull(
+                        getClass().getResource("../resources/styles/style.css")).toExternalForm());
         dialogPane.getStyleClass().add("dialog-pane");
     }
 }

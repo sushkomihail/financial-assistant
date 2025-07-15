@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
 <?import javafx.geometry.Insets?>
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            stylesheets="@../styles/style.css"
-            fx:controller="com.paxeevamaria.logic.RootController">
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane stylesheets="@../styles/style.css" xmlns="http://javafx.com/javafx/21.0.7" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.paxeevamaria.logic.RootController">
 
     <!-- Верхняя панель - меню -->
     <top>
         <MenuBar>
             <Menu text="Файл">
-                <MenuItem text="Выход" onAction="#handleExit"/>
+                <MenuItem onAction="#handleExit" text="Выход" />
             </Menu>
             <Menu text="Операции">
-                <MenuItem text="Доходы" onAction="#showIncome"/>
-                <MenuItem text="Расходы" onAction="#showExpense"/>
+                <MenuItem onAction="#showIncome" text="Доходы" />
+                <MenuItem onAction="#showExpense" text="Расходы" />
             </Menu>
             <Menu text="Аналитика">
-                <MenuItem text="Кредиты" onAction="#showCredit"/>
+                <MenuItem onAction="#showCredit" text="Кредиты" />
             </Menu>
+         <Menu fx:id="userMenu" mnemonicParsing="false" text="Пользователь: не авторизован">
+           <items>
+             <MenuItem mnemonicParsing="false" onAction="#handleLogout" text="Выход" />
+           </items>
+         </Menu>
         </MenuBar>
 
     </top>
@@ -30,26 +36,26 @@
     <left>
         <VBox spacing="10" styleClass="sidebar">
             <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
+                <Insets bottom="10" left="10" right="10" top="10" />
             </padding>
-            <Button text="Главная" onAction="#showDashboard" styleClass="nav-button">
+            <Button onAction="#showDashboard" styleClass="nav-button" text="Главная">
                 <padding>
-                    <Insets top="5" right="10" bottom="5" left="10"/>
+                    <Insets bottom="5" left="10" right="10" top="5" />
                 </padding>
             </Button>
-            <Button text="Доходы" onAction="#showIncome" styleClass="nav-button">
+            <Button onAction="#showIncome" styleClass="nav-button" text="Доходы">
                 <padding>
-                    <Insets top="5" right="10" bottom="5" left="10"/>
+                    <Insets bottom="5" left="10" right="10" top="5" />
                 </padding>
             </Button>
-            <Button text="Расходы" onAction="#showExpense" styleClass="nav-button">
+            <Button onAction="#showExpense" styleClass="nav-button" text="Расходы">
                 <padding>
-                    <Insets top="5" right="10" bottom="5" left="10"/>
+                    <Insets bottom="5" left="10" right="10" top="5" />
                 </padding>
             </Button>
-            <Button text="Кредиты" onAction="#showCredit" styleClass="nav-button">
+            <Button onAction="#showCredit" styleClass="nav-button" text="Кредиты">
                 <padding>
-                    <Insets top="5" right="10" bottom="5" left="10"/>
+                    <Insets bottom="5" left="10" right="10" top="5" />
                 </padding>
             </Button>
         </VBox>

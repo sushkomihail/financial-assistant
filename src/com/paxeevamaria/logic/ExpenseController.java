@@ -1,8 +1,8 @@
 package com.paxeevamaria.logic;
 
-import com.kolesnikovroman.CategorySummaryDTO;
 import com.kolesnikovroman.ExpenseDTO;
 import com.kolesnikovroman.FinancialRepository;
+import com.kolesnikovroman.UserDTO;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -10,7 +10,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
@@ -21,8 +20,8 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ExpenseController {
     @FXML private ComboBox<String> categoryComboBox;
@@ -36,12 +35,14 @@ public class ExpenseController {
     @FXML private TableColumn<ExpenseDTO, BigDecimal> amountColumn;
     @FXML private TableColumn<ExpenseDTO, String> commentColumn;
 
+    private UserDTO user;
     private FinancialRepository financialRepository;
-    private ObservableList<ExpenseDTO> allExpenses = FXCollections.observableArrayList();
-    private ObservableList<String> allCategories = FXCollections.observableArrayList();
+    private final ObservableList<ExpenseDTO> allExpenses = FXCollections.observableArrayList();
+    private final ObservableList<String> allCategories = FXCollections.observableArrayList();
 
     @FXML
-    public void initialize() {
+    public void initialize(UserDTO user) {
+        this.user = user;
         financialRepository = new FinancialRepository();
 
         // Инициализация столбцов таблицы
@@ -127,7 +128,7 @@ public class ExpenseController {
 
     private void loadExpenses() {
         try {
-            List<ExpenseDTO> expenses = financialRepository.findAllExpenses();
+            List<ExpenseDTO> expenses = financialRepository.findAllExpenses(user.id());
             allExpenses.setAll(expenses);
             expensesTable.setItems(allExpenses);
             updateSummary();
@@ -146,7 +147,8 @@ public class ExpenseController {
             dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
             Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/add-icon.png")));
+            stage.getIcons().add(new Image(Objects.requireNonNull(
+                            getClass().getResourceAsStream("../resources/images/add-icon.png"))));
 
             // Создание формы
             GridPane grid = new GridPane();
@@ -176,7 +178,7 @@ public class ExpenseController {
                     try {
                         BigDecimal amount = new BigDecimal(amountField.getText());
                         return new ExpenseDTO(0, amount, datePicker.getValue(),
-                                commentArea.getText(), categoryCombo.getValue());
+                                commentArea.getText(), categoryCombo.getValue(), user.id());
                     } catch (NumberFormatException e) {
                         showError("Ошибка", "Некорректная сумма");
                         return null;
@@ -216,7 +218,8 @@ public class ExpenseController {
             dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
             Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/add-icon.png")));
+            stage.getIcons().add(new Image(Objects.requireNonNull(
+                    getClass().getResourceAsStream("../resources/images/add-icon.png"))));
 
             GridPane grid = new GridPane();
             grid.setHgap(10);
@@ -245,7 +248,7 @@ public class ExpenseController {
                     try {
                         BigDecimal amount = new BigDecimal(amountField.getText());
                         return new ExpenseDTO(selected.id(), amount, datePicker.getValue(),
-                                commentArea.getText(), categoryCombo.getValue());
+                                commentArea.getText(), categoryCombo.getValue(), user.id());
                     } catch (NumberFormatException e) {
                         showError("Ошибка", "Некорректная сумма");
                         return null;
@@ -284,7 +287,8 @@ public class ExpenseController {
         setupDialogStyles(alert);
         alert.getDialogPane().getStyleClass().add("warning");
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(new Image(getClass().getResourceAsStream("../resources/images/delete-icon.png")));
+        stage.getIcons().add(new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream("../resources/images/delete-icon.png"))));
         alert.setHeaderText("Вы действительно хотите удалить выбранный расход?");
         alert.setContentText(String.format("Дата: %s\nКатегория: %s\nСумма: %,.2f ₽",
                 selected.transactionDate(),
@@ -320,11 +324,8 @@ public class ExpenseController {
             if (startDate != null && expense.transactionDate().isBefore(startDate)) {
                 return false;
             }
-            if (endDate != null && expense.transactionDate().isAfter(endDate)) {
-                return false;
-            }
 
-            return true;
+            return endDate == null || !expense.transactionDate().isAfter(endDate);
         });
 
         expensesTable.setItems(filtered);
@@ -359,9 +360,8 @@ public class ExpenseController {
 
     private void setupDialogStyles(Dialog<?> dialog) {
         DialogPane dialogPane = dialog.getDialogPane();
-        dialogPane.getStylesheets().add(
-                getClass().getResource("../resources/styles/style.css").toExternalForm()
-        );
+        dialogPane.getStylesheets().add(Objects.requireNonNull(
+                getClass().getResource("../resources/styles/style.css")).toExternalForm());
         dialogPane.getStyleClass().add("dialog-pane");
     }
 }

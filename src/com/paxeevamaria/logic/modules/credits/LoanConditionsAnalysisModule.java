@@ -2,6 +2,7 @@ package com.paxeevamaria.logic.modules.credits;
 
 import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.MonthlyFinancialSummaryDTO;
+import com.kolesnikovroman.UserDTO;
 import com.paxeevamaria.logic.TextFieldMask;
 import com.sushkomihail.loan.*;
 import javafx.event.ActionEvent;
@@ -26,7 +27,8 @@ public class LoanConditionsAnalysisModule {
                                         TextField loanInterestRateTextField,
                                         ChoiceBox<String> loanPaymentTypeChoiceBox,
                                         Button loanConditionsAnalysisButton,
-                                        TextArea loanConditionsAnalysisTextArea) {
+                                        TextArea loanConditionsAnalysisTextArea,
+                                        int userId) {
         this.analysisContainer = analysisContainer;
         this.loanAmountTextField = loanAmountTextField;
         this.loanPeriodTextField = loanPeriodTextField;
@@ -47,12 +49,12 @@ public class LoanConditionsAnalysisModule {
         loanConditionsAnalysisButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                performAnalysis();
+                performAnalysis(userId);
             }
         });
     }
 
-    private void performAnalysis() {
+    private void performAnalysis(int userId) {
         analysisContainer.setVisible(!analysisContainer.isVisible());
         loanConditionsAnalysisTextArea.setVisible(true);
         PaymentType paymentType = PaymentType.fromString(loanPaymentTypeChoiceBox.getValue());
@@ -84,7 +86,7 @@ public class LoanConditionsAnalysisModule {
         }
 
         try {
-            LoanAnalysis analysis = new LoanAnalysis(loan, getAverageIncome());
+            LoanAnalysis analysis = new LoanAnalysis(loan, getAverageIncome(userId));
             loanConditionsAnalysisTextArea.setText(analysis.perform());
         } catch (SQLException e) {
             loanConditionsAnalysisTextArea.setText("Не удалось получить данные о доходах!");
@@ -92,10 +94,10 @@ public class LoanConditionsAnalysisModule {
         }
     }
 
-    private float getAverageIncome() throws SQLException {
+    private float getAverageIncome(int userId) throws SQLException {
         float averageIncome = 0F;
         FinancialRepository repository = new FinancialRepository();
-        List<MonthlyFinancialSummaryDTO> summaries = repository.getMonthlyFinancialSummary();
+        List<MonthlyFinancialSummaryDTO> summaries = repository.getMonthlyFinancialSummary(userId);
 
         if (!summaries.isEmpty()) {
             for (MonthlyFinancialSummaryDTO summary : summaries) {

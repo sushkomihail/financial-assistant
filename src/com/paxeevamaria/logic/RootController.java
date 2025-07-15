@@ -1,38 +1,74 @@
 package com.paxeevamaria.logic;
 
 import com.paxeevamaria.App;
+import com.sushkomihail.login.ILoginObserver;
 import javafx.fxml.FXML;
+import javafx.scene.control.Menu;
 
-public class RootController {
+public class RootController implements ILoginObserver {
+    @FXML private Menu userMenu;
 
-    private App mainApp;
+    private App app;
 
-    public void setMainApp(App mainApp) {
-        this.mainApp = mainApp;
+    public void initialize(App app) {
+        this.app = app;
     }
 
     @FXML
     private void handleExit() {
-        mainApp.exit();
+        app.exit();
+    }
+
+    @FXML
+    private void handleLogout() {
+        app.getLoginController().getCurrentLoginModule().getMethod().logout();
+        app.showLoginPane();
+        userMenu.setText("Пользователь: не авторизован");
     }
 
     @FXML
     private void showDashboard() {
-        mainApp.showDashboard();
+        if (app.getUser() == null) {
+            return;
+        }
+
+        app.showDashboard();
     }
 
     @FXML
     private void showIncome() {
-        mainApp.showIncome();
+        if (app.getUser() == null) {
+            return;
+        }
+
+        app.showIncome();
     }
 
     @FXML
     private void showExpense() {
-        mainApp.showExpense();
+        if (app.getUser() == null) {
+            return;
+        }
+
+        app.showExpense();
     }
 
     @FXML
     private void showCredit() {
-        mainApp.showCredits();
+        if (app.getUser() == null) {
+            return;
+        }
+
+        app.showCredits();
+    }
+
+    @Override
+    public void observeLoginResult(boolean isSuccessful) {
+        if (isSuccessful) {
+            userMenu.setText(String.format("Пользователь: %s", app.getUser().login()));
+            showDashboard();
+        } else {
+            userMenu.setText("Пользователь: не авторизован");
+        }
     }
 }

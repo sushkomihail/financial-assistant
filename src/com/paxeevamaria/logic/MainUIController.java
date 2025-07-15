@@ -3,6 +3,7 @@ package com.paxeevamaria.logic;
 import com.kolesnikovroman.CategorySummaryDTO;
 import com.kolesnikovroman.FinancialRepository;
 import com.kolesnikovroman.MonthlyFinancialSummaryDTO;
+import com.kolesnikovroman.UserDTO;
 import com.sushkomihail.llmagent.LlmAgentController;
 import com.sushkomihail.datastructures.NetIncomesCollection;
 import com.sushkomihail.llmagent.requests.SavingsForecastRequest;
@@ -19,26 +20,24 @@ import javafx.scene.control.ProgressIndicator;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MainUIController {
-    @FXML
-    private PieChart expensePieChart; // Круговая диаграмма расходов
-    @FXML
-    private BarChart<String, Number> incomeExpenseBarChart; // Столбчатая диаграмма доходов/расходов
-    @FXML
-    private LineChart<String, Number> savingsChart; // Линейный график накоплений
-    @FXML
-    private ProgressIndicator pieChartLoading; // Индикатор загрузки для круговой диаграммы
-    @FXML
-    private ProgressIndicator barChartLoading; // Индикатор загрузки для столбчатой диаграммы
-    @FXML
-    private ProgressIndicator lineChartLoading; // Индикатор загрузки для графика накоплений
+    @FXML private PieChart expensePieChart; // Круговая диаграмма расходов
+    @FXML private BarChart<String, Number> incomeExpenseBarChart; // Столбчатая диаграмма доходов/расходов
+    @FXML private LineChart<String, Number> savingsChart; // Линейный график накоплений
+    @FXML private ProgressIndicator pieChartLoading; // Индикатор загрузки для круговой диаграммы
+    @FXML private ProgressIndicator barChartLoading; // Индикатор загрузки для столбчатой диаграммы
+    @FXML private ProgressIndicator lineChartLoading; // Индикатор загрузки для графика накоплений
 
+    private UserDTO user;
     private LlmAgentController llmAgentController;
     private FinancialRepository financialRepository;
+
+    public void setUser(UserDTO user) {
+        this.user = user;
+    }
 
     // Инициализация главной панели
     public void setMainPanel(LlmAgentController llmAgentController) {
@@ -63,7 +62,7 @@ public class MainUIController {
         Task<ObservableList<PieChart.Data>> task = new Task<>() {
             @Override
             protected ObservableList<PieChart.Data> call() throws Exception {
-                List<CategorySummaryDTO> summaries = financialRepository.getLastMonthSummary();
+                List<CategorySummaryDTO> summaries = financialRepository.getLastMonthSummary(user.id());
                 ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
 
                 // Преобразование данных в формат для PieChart диаграммы
@@ -102,7 +101,8 @@ public class MainUIController {
             @Override
             protected Void call() throws Exception {
                 try {
-                    List<MonthlyFinancialSummaryDTO> summaries = financialRepository.getMonthlyFinancialSummary();
+                    List<MonthlyFinancialSummaryDTO> summaries =
+                            financialRepository.getMonthlyFinancialSummary(user.id());
 
                     if (summaries.size() > 3) {
                         summaries = summaries.subList(summaries.size() - 3, summaries.size());
@@ -177,16 +177,17 @@ public class MainUIController {
 
                 try {
                     // Получение данных о прошлых доходах и расходах из базы
-                    List<MonthlyFinancialSummaryDTO> history = financialRepository.getMonthlyFinancialSummary();
+                    List<MonthlyFinancialSummaryDTO> history =
+                            financialRepository.getMonthlyFinancialSummary(user.id());
 
                     // Подготовка данных для прогноза
                     List<BigDecimal> incomes = history.stream()
                             .map(MonthlyFinancialSummaryDTO::getTotalIncome)
-                            .collect(Collectors.toList());
+                            .toList();
 
                     List<BigDecimal> expenses = history.stream()
                             .map(MonthlyFinancialSummaryDTO::getTotalExpense)
-                            .collect(Collectors.toList());
+                            .toList();
 
                     // Получение прогноза из LLM на 6 месяцев
                     SavingsForecastRequest request = new SavingsForecastRequest(
@@ -269,14 +270,8 @@ public class MainUIController {
         return nextMonths;
     }
 
-    // Ceттер для установки LlmAgentController
-    public void setLlmAgentController(LlmAgentController llmAgentController) {
-        this.llmAgentController = llmAgentController;
-    }
-
     /**
      * Показывает диалоговое окно с сообщением об ошибке
-     *
      * @param message Текст сообщения об ошибке
      */
     private void showErrorDialog(String message) {
