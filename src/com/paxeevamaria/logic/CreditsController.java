@@ -78,6 +78,8 @@ public class CreditsController {
                 loanConditionsAnalysisTextArea,
                 user.id()
         );
+
+        loadCreditOffers();
     }
 
     private void loadCreditOffers() {

@@ -579,7 +579,7 @@
 .dialog-pane .text-field,
 .dialog-pane .combo-box,
 .dialog-pane .date-picker {
-    -fx-background-color: -white;
+    -fx-background-color: white;
     -fx-border-color: #e0e0e0;
     -fx-border-radius: 4px;
     -fx-padding: 8px 12px;

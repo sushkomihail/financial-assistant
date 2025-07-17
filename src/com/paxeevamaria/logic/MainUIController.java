@@ -50,7 +50,7 @@ public class MainUIController {
     private void updateCharts() {
         updateExpensePieChart();
         updateIncomeExpenseBarChart();
-        //updateSavingsChart();
+        // updateSavingsChart();
     }
 
     // Метод для обновления круговой диаграммы расходов

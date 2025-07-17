@@ -173,6 +173,11 @@ public class IncomeController {
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
                 try {
+                    if (categoryCombo.getValue() == null) {
+                        showError("Ошибка", "Некорректная категория дохода");
+                        return null;
+                    }
+
                     BigDecimal amount = new BigDecimal(amountField.getText());
                     return new IncomeDTO(0, amount, datePicker.getValue(),
                             commentArea.getText(), categoryCombo.getValue(), user.id());

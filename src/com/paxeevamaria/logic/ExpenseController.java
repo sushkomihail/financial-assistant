@@ -176,6 +176,11 @@ public class ExpenseController {
             dialog.setResultConverter(dialogButton -> {
                 if (dialogButton == ButtonType.OK) {
                     try {
+                        if (categoryCombo.getValue() == null) {
+                            showError("Ошибка", "Некорректная категория расхода");
+                            return null;
+                        }
+
                         BigDecimal amount = new BigDecimal(amountField.getText());
                         return new ExpenseDTO(0, amount, datePicker.getValue(),
                                 commentArea.getText(), categoryCombo.getValue(), user.id());

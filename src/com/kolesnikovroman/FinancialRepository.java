@@ -65,18 +65,20 @@ public final class FinancialRepository extends DataBaseRepository {
      * @throws IllegalArgumentException если указанная категория не найдена.
      */
     public void updateExpense(ExpenseDTO expense) throws SQLException {
-        final String sql = "UPDATE expenses SET amount = ?, transaction_date = ?, comment = ?, category_id = ? WHERE id = ?;";
+        final String sql = "UPDATE expenses SET amount = ?, transaction_date = ?, comment = ?, category_id = ? " +
+                "WHERE id = ?";
 
         try (Connection connection = getConnection()) {
             long categoryId = getCategoryIdByName(connection, "expense_categories", expense.categoryName())
-                    .orElseThrow(() -> new IllegalArgumentException("Категория расходов '" + expense.categoryName() + "' не найдена."));
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Категория расходов '" + expense.categoryName() + "' не найдена."));
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setBigDecimal(1, expense.amount());
                 statement.setDate(2, Date.valueOf(expense.transactionDate()));
                 statement.setString(3, expense.comment());
                 statement.setLong(4, categoryId);
-                statement.setLong(5, expense.userId());
+                statement.setLong(5, expense.id());
 
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows == 0) {
@@ -151,18 +153,20 @@ public final class FinancialRepository extends DataBaseRepository {
      * Обновляет существующую запись о доходе.
      */
     public void updateIncome(IncomeDTO income) throws SQLException {
-        final String sql = "UPDATE incomes SET amount = ?, transaction_date = ?, comment = ?, category_id = ? WHERE id = ?;";
+        final String sql = "UPDATE incomes SET amount = ?, transaction_date = ?, comment = ?, category_id = ? " +
+                "WHERE id = ?";
 
         try (Connection connection = getConnection()) {
             long categoryId = getCategoryIdByName(connection, "income_categories", income.categoryName())
-                    .orElseThrow(() -> new IllegalArgumentException("Категория доходов '" + income.categoryName() + "' не найдена."));
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Категория доходов '" + income.categoryName() + "' не найдена."));
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setBigDecimal(1, income.amount());
                 statement.setDate(2, Date.valueOf(income.transactionDate()));
                 statement.setString(3, income.comment());
                 statement.setLong(4, categoryId);
-                statement.setLong(5, income.userId());
+                statement.setLong(5, income.id());
 
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows == 0) {
